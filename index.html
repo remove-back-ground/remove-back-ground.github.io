@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ClearCut AI – Professional Background Removal</title>
+  <meta name="description" content="Remove image backgrounds instantly with AI. Free, fast, and professional-quality results. No signup required." />
+  <meta name="keywords" content="background removal, remove background, AI background remover, transparent background, photo editing" />
+  <meta property="og:title" content="ClearCut AI – Remove Backgrounds Instantly" />
+  <meta property="og:description" content="AI-powered background removal. 3 free images, no signup." />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="assets/og-image.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,300&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- Cookie Banner -->
+  <div id="cookieBanner" class="cookie-banner">
+    <div class="cookie-content">
+      <span>🍪 We use cookies to improve your experience. <a href="#privacy">Privacy Policy</a></span>
+      <div class="cookie-btns">
+        <button onclick="acceptCookies()" class="btn-cookie-accept">Accept</button>
+        <button onclick="declineCookies()" class="btn-cookie-decline">Decline</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <header class="header">
+    <nav class="nav">
+      <div class="logo">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+          <rect width="28" height="28" rx="8" fill="url(#logoGrad)"/>
+          <path d="M8 14C8 10.686 10.686 8 14 8s6 2.686 6 6-2.686 6-6 6-6-2.686-6-6z" fill="white" opacity="0.9"/>
+          <path d="M14 11C14 11 17 13 17 14C17 15.657 15.657 17 14 17C12.343 17 11 15.657 11 14C11 12.343 12.343 11 14 11Z" fill="url(#logoGrad)"/>
+          <defs>
+            <linearGradient id="logoGrad" x1="0" y1="0" x2="28" y2="28">
+              <stop offset="0%" stop-color="#4F8EF7"/>
+              <stop offset="100%" stop-color="#7C3AED"/>
+            </linearGradient>
+          </defs>
+        </svg>
+        <span class="logo-text">ClearCut <span class="logo-ai">AI</span></span>
+      </div>
+      <div class="nav-links">
+        <a href="#pricing">Pricing</a>
+        <a href="#how-it-works">How it Works</a>
+        <a href="#faq">FAQ</a>
+        <button class="btn-nav-cta" onclick="scrollToApp()">Try Free</button>
+      </div>
+      <button class="nav-hamburger" id="navHamburger" onclick="toggleMobileMenu()">
+        <span></span><span></span><span></span>
+      </button>
+    </nav>
+    <div class="mobile-menu" id="mobileMenu">
+      <a href="#pricing" onclick="toggleMobileMenu()">Pricing</a>
+      <a href="#how-it-works" onclick="toggleMobileMenu()">How it Works</a>
+      <a href="#faq" onclick="toggleMobileMenu()">FAQ</a>
+      <button class="btn-nav-cta" onclick="scrollToApp(); toggleMobileMenu()">Try Free →</button>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-bg-orbs">
+      <div class="orb orb-1"></div>
+      <div class="orb orb-2"></div>
+      <div class="orb orb-3"></div>
+    </div>
+    <div class="hero-content">
+      <div class="hero-badge">✨ AI-Powered · No Signup · Free to Start</div>
+      <h1 class="hero-title">Remove Backgrounds<br/><span class="gradient-text">In Seconds</span></h1>
+      <p class="hero-subtitle">Professional-quality background removal powered by on-device AI. Your images never leave your browser.</p>
+      <div class="hero-cta">
+        <button class="btn-primary" onclick="scrollToApp()">Remove Background Free →</button>
+        <span class="hero-note">3 free images · No credit card</span>
+      </div>
+      <div class="hero-stats">
+        <div class="stat"><strong>100%</strong><span>Private</span></div>
+        <div class="stat-divider"></div>
+        <div class="stat"><strong>&lt;5s</strong><span>Processing</span></div>
+        <div class="stat-divider"></div>
+        <div class="stat"><strong>PNG</strong><span>Transparent Output</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main App -->
+  <section class="app-section" id="app">
+    <div class="app-container">
+
+      <!-- Usage Counter -->
+      <div class="usage-bar" id="usageBar">
+        <div class="usage-info">
+          <span class="usage-label">Free images remaining</span>
+          <span class="usage-count" id="usageCount">3</span>
+        </div>
+        <div class="usage-track">
+          <div class="usage-fill" id="usageFill" style="width:100%"></div>
+        </div>
+        <div class="usage-dots" id="usageDots">
+          <span class="dot active" id="dot0"></span>
+          <span class="dot active" id="dot1"></span>
+          <span class="dot active" id="dot2"></span>
+        </div>
+      </div>
+
+      <!-- Upload Zone -->
+      <div class="upload-area" id="uploadArea">
+        <div class="upload-zone" id="uploadZone"
+             ondragover="handleDragOver(event)"
+             ondragleave="handleDragLeave(event)"
+             ondrop="handleDrop(event)"
+             onclick="triggerUpload()">
+          <div class="upload-icon">
+            <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
+              <circle cx="28" cy="28" r="28" fill="url(#uploadGrad)" opacity="0.1"/>
+              <path d="M28 36V20M20 28l8-8 8 8" stroke="url(#uploadGrad)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              <rect x="18" y="38" width="20" height="2" rx="1" fill="url(#uploadGrad)"/>
+              <defs>
+                <linearGradient id="uploadGrad" x1="0" y1="0" x2="56" y2="56">
+                  <stop offset="0%" stop-color="#4F8EF7"/>
+                  <stop offset="100%" stop-color="#7C3AED"/>
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+          <h3 class="upload-title">Drop your image here</h3>
+          <p class="upload-sub">or <span class="upload-link">click to browse</span></p>
+          <p class="upload-hint">JPEG, PNG, WEBP · Max 10MB</p>
+        </div>
+        <div class="upload-alt">
+          <button class="btn-paste" onclick="pasteFromClipboard()">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 2H13C13.5523 2 14 2.44772 14 3V13C14 13.5523 13.5523 14 13 14H3C2.44772 14 2 13.5523 2 13V3C2 2.44772 2.44772 2 3 2H6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><rect x="5" y="1" width="6" height="3" rx="1" stroke="currentColor" stroke-width="1.5"/></svg>
+            Paste from clipboard
+          </button>
+          <span class="upload-alt-hint">Ctrl+V / ⌘V</span>
+        </div>
+        <input type="file" id="fileInput" accept="image/jpeg,image/png,image/webp" style="display:none" onchange="handleFileSelect(event)" />
+      </div>
+
+      <!-- Processing Area -->
+      <div class="processing-area hidden" id="processingArea">
+
+        <!-- Image Preview + Controls -->
+        <div class="image-controls">
+          <div class="image-meta" id="imageMeta"></div>
+          <div class="control-buttons">
+            <button class="btn-reset" onclick="resetApp()">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 7C1 3.686 3.686 1 7 1c1.879 0 3.565.826 4.728 2.143M13 7C13 10.314 10.314 13 7 13c-1.879 0-3.565-.826-4.728-2.143" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M11 1v3.5H7.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Reset
+            </button>
+          </div>
+        </div>
+
+        <!-- Before/After Comparison -->
+        <div class="comparison-container" id="comparisonContainer">
+          <div class="image-panel">
+            <div class="panel-label">Original</div>
+            <img id="originalImg" class="preview-img" alt="Original" />
+          </div>
+          <div class="panel-divider">→</div>
+          <div class="image-panel result-panel">
+            <div class="panel-label">Result</div>
+            <div class="result-placeholder" id="resultPlaceholder">
+              <div class="checker-bg">
+                <span class="placeholder-text">Result appears here</span>
+              </div>
+            </div>
+            <div class="result-img-wrap hidden" id="resultImgWrap">
+              <div class="checker-bg-result">
+                <img id="resultImg" class="preview-img" alt="Result" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Process Button -->
+        <div class="process-controls">
+          <button class="btn-process" id="processBtn" onclick="processImage()">
+            <span class="btn-process-text">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 1.5C4.858 1.5 1.5 4.858 1.5 9S4.858 16.5 9 16.5 16.5 13.142 16.5 9" stroke="white" stroke-width="1.8" stroke-linecap="round"/><path d="M13 1.5l2 2-2 2M15 3.5H9" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Remove Background
+            </span>
+            <span class="btn-process-loading hidden">
+              <span class="spinner"></span>
+              Processing...
+            </span>
+          </button>
+
+          <!-- Progress (model download) -->
+          <div class="model-progress hidden" id="modelProgress">
+            <div class="model-progress-label" id="modelProgressLabel">Loading AI model…</div>
+            <div class="model-progress-track">
+              <div class="model-progress-fill" id="modelProgressFill"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Result Actions -->
+        <div class="result-actions hidden" id="resultActions">
+          <button class="btn-download" onclick="downloadResult()">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2v8M4 7l4 4 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M2 12h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+            Download PNG
+          </button>
+          <button class="btn-copy" onclick="copyToClipboard()">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="5" y="5" width="9" height="9" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M11 5V3.5A1.5 1.5 0 0 0 9.5 2h-6A1.5 1.5 0 0 0 2 3.5v6A1.5 1.5 0 0 0 3.5 11H5" stroke="currentColor" stroke-width="1.5"/></svg>
+            Copy
+          </button>
+          <button class="btn-new" onclick="resetApp()">
+            + New Image
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- How It Works -->
+  <section class="how-section" id="how-it-works">
+    <div class="section-container">
+      <div class="section-label">Simple Process</div>
+      <h2 class="section-title">Three steps to a perfect cutout</h2>
+      <div class="steps-grid">
+        <div class="step-card">
+          <div class="step-num">01</div>
+          <div class="step-icon">📤</div>
+          <h3>Upload</h3>
+          <p>Drag & drop or paste your image. JPEG, PNG, and WEBP supported up to 10MB.</p>
+        </div>
+        <div class="step-arrow">→</div>
+        <div class="step-card">
+          <div class="step-num">02</div>
+          <div class="step-icon">⚡</div>
+          <h3>Process</h3>
+          <p>Our on-device AI analyzes and removes the background in seconds. Privacy guaranteed.</p>
+        </div>
+        <div class="step-arrow">→</div>
+        <div class="step-card">
+          <div class="step-num">03</div>
+          <div class="step-icon">💾</div>
+          <h3>Download</h3>
+          <p>Get your transparent PNG instantly. No watermarks, no compression, full quality.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing -->
+  <section class="pricing-section" id="pricing">
+    <div class="section-container">
+      <div class="section-label">Simple Pricing</div>
+      <h2 class="section-title">Pay once, use forever</h2>
+      <p class="section-sub">No subscriptions. No monthly fees. Just credits that never expire.</p>
+      <div class="pricing-grid">
+        <div class="pricing-card">
+          <div class="plan-name">Starter</div>
+          <div class="plan-price"><span class="plan-currency">$</span>2<span class="plan-cents">.95</span></div>
+          <div class="plan-desc">100 image credits</div>
+          <ul class="plan-features">
+            <li>✓ 100 background removals</li>
+            <li>✓ Full HD resolution</li>
+            <li>✓ Transparent PNG output</li>
+            <li>✓ No watermarks</li>
+            <li>✓ Credits never expire</li>
+          </ul>
+          <button class="btn-plan" onclick="purchasePlan('basic')">Get Started →</button>
+          <p class="plan-note">One-time payment</p>
+        </div>
+        <div class="pricing-card pricing-featured">
+          <div class="plan-badge">Most Popular</div>
+          <div class="plan-name">Pro</div>
+          <div class="plan-price"><span class="plan-currency">$</span>6<span class="plan-cents">.95</span></div>
+          <div class="plan-desc">500 image credits</div>
+          <div class="plan-savings">Save 53% vs Starter</div>
+          <ul class="plan-features">
+            <li>✓ 500 background removals</li>
+            <li>✓ Full HD resolution</li>
+            <li>✓ Transparent PNG output</li>
+            <li>✓ No watermarks</li>
+            <li>✓ Credits never expire</li>
+            <li>✓ Priority processing</li>
+            <li>✓ Batch upload (soon)</li>
+          </ul>
+          <button class="btn-plan btn-plan-featured" onclick="purchasePlan('pro')">Get Pro →</button>
+          <p class="plan-note">One-time payment · Money-back guarantee</p>
+        </div>
+      </div>
+      <div class="trust-badges">
+        <div class="trust-badge">🔒 SSL Secured</div>
+        <div class="trust-badge">💳 Stripe Payments</div>
+        <div class="trust-badge">↩️ 30-day refund</div>
+        <div class="trust-badge">🌍 GDPR Compliant</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonials -->
+  <section class="testimonials-section">
+    <div class="section-container">
+      <h2 class="section-title">Loved by creators</h2>
+      <div class="testimonials-grid">
+        <div class="testimonial-card">
+          <div class="testimonial-stars">★★★★★</div>
+          <p>"ClearCut saved me hours every week. The quality is incredible and it runs right in my browser."</p>
+          <div class="testimonial-author">
+            <div class="author-avatar" style="background:linear-gradient(135deg,#4F8EF7,#7C3AED)">S</div>
+            <div><strong>Sarah M.</strong><span>Etsy Seller</span></div>
+          </div>
+        </div>
+        <div class="testimonial-card">
+          <div class="testimonial-stars">★★★★★</div>
+          <p>"Finally a background remover that handles hair properly. The results are professional-grade."</p>
+          <div class="testimonial-author">
+            <div class="author-avatar" style="background:linear-gradient(135deg,#10B981,#059669)">J</div>
+            <div><strong>James K.</strong><span>Product Photographer</span></div>
+          </div>
+        </div>
+        <div class="testimonial-card">
+          <div class="testimonial-stars">★★★★★</div>
+          <p>"The fact that my images stay on my device is huge for client confidentiality. Absolute must-have."</p>
+          <div class="testimonial-author">
+            <div class="author-avatar" style="background:linear-gradient(135deg,#F59E0B,#EF4444)">A</div>
+            <div><strong>Anika R.</strong><span>Graphic Designer</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="faq-section" id="faq">
+    <div class="section-container faq-container">
+      <div class="section-label">Questions</div>
+      <h2 class="section-title">Frequently Asked</h2>
+      <div class="faq-list" id="faqList">
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(0)">
+            Is my image data private?
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-a">Yes. All processing happens entirely in your browser using on-device AI. Your images are never uploaded to any server. We literally cannot see your images.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(1)">
+            What image formats are supported?
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-a">We support JPEG, PNG, and WEBP formats up to 10MB. Output is always a transparent PNG for maximum compatibility.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(2)">
+            Why does the first image take longer?
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-a">The first time you use the app, the AI model (~25MB) is downloaded to your browser. Subsequent images process much faster as the model is cached.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(3)">
+            Do purchased credits expire?
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-a">No. Purchased credits never expire and are stored locally in your browser. We recommend using the same browser to access your credits.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(4)">
+            Is there a refund policy?
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-a">Yes! We offer a 30-day money-back guarantee. If you're not satisfied, contact us at support@clearcut.ai for a full refund, no questions asked.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Blog Tips -->
+  <section class="blog-section">
+    <div class="section-container">
+      <div class="section-label">Tips & Tricks</div>
+      <h2 class="section-title">Get better results</h2>
+      <div class="blog-grid">
+        <div class="blog-card">
+          <div class="blog-emoji">💡</div>
+          <h3>Use High Contrast</h3>
+          <p>Images where the subject clearly differs from the background give the best results. Avoid busy or patterned backgrounds when possible.</p>
+        </div>
+        <div class="blog-card">
+          <div class="blog-emoji">📐</div>
+          <h3>Optimal Resolution</h3>
+          <p>Images between 500px and 4000px wide work best. Very small images may lose fine details like hair strands or thin edges.</p>
+        </div>
+        <div class="blog-card">
+          <div class="blog-emoji">🎨</div>
+          <h3>Product Photography</h3>
+          <p>Place products on a plain white or solid-color backdrop for near-perfect automated cutouts every time, ready for e-commerce.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer" id="privacy">
+    <div class="footer-container">
+      <div class="footer-brand">
+        <div class="logo">
+          <svg width="24" height="24" viewBox="0 0 28 28" fill="none">
+            <rect width="28" height="28" rx="8" fill="url(#footerLogoGrad)"/>
+            <path d="M8 14C8 10.686 10.686 8 14 8s6 2.686 6 6-2.686 6-6 6-6-2.686-6-6z" fill="white" opacity="0.9"/>
+            <defs><linearGradient id="footerLogoGrad" x1="0" y1="0" x2="28" y2="28"><stop offset="0%" stop-color="#4F8EF7"/><stop offset="100%" stop-color="#7C3AED"/></linearGradient></defs>
+          </svg>
+          <span class="logo-text" style="font-size:1rem">ClearCut <span class="logo-ai">AI</span></span>
+        </div>
+        <p>Professional background removal, in your browser.</p>
+        <div class="social-links">
+          <a href="#" aria-label="Twitter">𝕏</a>
+          <a href="#" aria-label="Instagram">📷</a>
+          <a href="#" aria-label="LinkedIn">in</a>
+        </div>
+      </div>
+      <div class="footer-links">
+        <div class="footer-col">
+          <h4>Product</h4>
+          <a href="#app">Remove Background</a>
+          <a href="#pricing">Pricing</a>
+          <a href="#how-it-works">How it Works</a>
+        </div>
+        <div class="footer-col">
+          <h4>Legal</h4>
+          <a href="#tos" onclick="showModal('tos')">Terms of Service</a>
+          <a href="#privacy" onclick="showModal('privacy')">Privacy Policy</a>
+          <a href="#refund" onclick="showModal('refund')">Refund Policy</a>
+          <a href="#dmca" onclick="showModal('dmca')">DMCA</a>
+        </div>
+        <div class="footer-col">
+          <h4>Support</h4>
+          <a href="mailto:support@clearcut.ai">support@clearcut.ai</a>
+          <a href="#faq">FAQ</a>
+          <a href="#contact" onclick="showModal('contact')">Contact Us</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2024 ClearCut AI. All rights reserved.</p>
+      <p>Built with ❤️ using on-device AI · Your privacy is our priority</p>
+    </div>
+  </footer>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Ad Modal (Rewarded Video) -->
+  <div class="modal-overlay hidden" id="adModal">
+    <div class="modal-card">
+      <div class="modal-icon">🎬</div>
+      <h2 class="modal-title">You've used your 3 free images!</h2>
+      <p class="modal-desc">Watch a short ad to get <strong>3 more free removals</strong>, or upgrade for unlimited access.</p>
+      <div class="modal-actions">
+        <button class="btn-primary" onclick="startAd()">▶ Watch Ad (3 more images)</button>
+        <button class="btn-secondary" onclick="closeAdModal(); showPricingModal()">View Plans</button>
+      </div>
+      <div class="ad-timer hidden" id="adTimer">
+        <div class="ad-video-placeholder">
+          <div class="ad-play-icon">▶</div>
+          <p>Simulated Ad Playing…</p>
+          <div class="ad-progress-track">
+            <div class="ad-progress-fill" id="adProgressFill"></div>
+          </div>
+          <p class="ad-countdown" id="adCountdown">5</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Payment Modal -->
+  <div class="modal-overlay hidden" id="paymentModal">
+    <div class="modal-card modal-wide">
+      <button class="modal-close" onclick="closePaymentModal()">✕</button>
+      <div class="modal-icon">🚀</div>
+      <h2 class="modal-title">Unlock More Removals</h2>
+      <p class="modal-desc">You've used all your free images. Get more with a one-time purchase.</p>
+      <div class="modal-pricing-grid">
+        <div class="modal-plan">
+          <div class="modal-plan-name">Starter</div>
+          <div class="modal-plan-price">$2.95</div>
+          <div class="modal-plan-desc">100 images</div>
+          <button class="btn-plan" onclick="purchasePlan('basic')">Buy Now</button>
+        </div>
+        <div class="modal-plan modal-plan-featured">
+          <div class="modal-plan-badge">Best Value</div>
+          <div class="modal-plan-name">Pro</div>
+          <div class="modal-plan-price">$6.95</div>
+          <div class="modal-plan-desc">500 images</div>
+          <button class="btn-plan btn-plan-featured" onclick="purchasePlan('pro')">Buy Now</button>
+        </div>
+      </div>
+      <div class="modal-trust">🔒 SSL · ↩️ 30-day refund · 💳 Stripe</div>
+    </div>
+  </div>
+
+  <!-- Generic Info Modal (TOS, Privacy, etc.) -->
+  <div class="modal-overlay hidden" id="infoModal">
+    <div class="modal-card modal-wide modal-scroll">
+      <button class="modal-close" onclick="closeInfoModal()">✕</button>
+      <div id="infoModalContent"></div>
+    </div>
+  </div>
+
+  <!-- Contact Modal -->
+  <div class="modal-overlay hidden" id="contactModal">
+    <div class="modal-card">
+      <button class="modal-close" onclick="document.getElementById('contactModal').classList.add('hidden')">✕</button>
+      <h2 class="modal-title">Contact Us</h2>
+      <p class="modal-desc">We typically respond within 24 hours.</p>
+      <div class="contact-form">
+        <input type="text" placeholder="Your name" id="contactName" class="form-input" />
+        <input type="email" placeholder="Your email" id="contactEmail" class="form-input" />
+        <textarea placeholder="How can we help?" id="contactMsg" class="form-textarea" rows="4"></textarea>
+        <button class="btn-primary" onclick="submitContact()">Send Message</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
