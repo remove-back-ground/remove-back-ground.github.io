@@ -1,7 +1,29 @@
 /**
- * ClearCut AI – script.js (نهائي مع module)
+ * ClearCut AI – script.js
+ * Background Removal Web App
+ * Uses @imgly/background-removal via CDN
  */
 
+// ============================================================
+// DYNAMIC CDN IMPORT
+// ============================================================
+const LIBRARY_URL = 'https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.4.5/dist/browser/index.js';
+let imglyLib = null;
+
+async function loadLibrary() {
+  if (imglyLib) return imglyLib;
+  try {
+    imglyLib = await import(LIBRARY_URL);
+    return imglyLib;
+  } catch (e) {
+    console.error('Failed to load background removal library:', e);
+    throw new Error('Could not load AI library. Check your connection.');
+  }
+}
+
+// ============================================================
+// STATE
+// ============================================================
 const MAX_FREE = 3;
 const AD_BONUS = 3;
 const MAX_TOTAL_FREE = 6;
@@ -15,9 +37,9 @@ let state = {
   currentFile: null,
   resultBlob: null,
   processing: false,
-  libraryReady: false,
 };
 
+// localStorage keys
 const KEYS = {
   removeCount: 'cc_removeCount',
   adWatched: 'cc_adWatched',
@@ -27,24 +49,20 @@ const KEYS = {
   cookieConsent: 'cc_cookieConsent',
 };
 
-// نسمعو الحدث libraryReady
-window.addEventListener('libraryReady', () => {
-  console.log('Library ready event received');
-  state.libraryReady = true;
-  updateUsageUI();
-  // نقدرو نعطيو رسالة للمستخدم
-  showToast('AI model ready!', 'success');
-});
-
+// ============================================================
+// INIT
+// ============================================================
 function init() {
   loadState();
   updateUsageUI();
   setupKeyboardShortcuts();
   checkCookieBanner();
-  // إذا المكتبة كانت محملة من قبل (يمكن تكون تزامنت)
-  if (window.removeBackground) {
-    state.libraryReady = true;
-    updateUsageUI();
+
+  // Reset reset for each day (optional - remove for persistence)
+  const today = new Date().toDateString();
+  const lastVisit = localStorage.getItem('cc_lastVisit');
+  if (lastVisit !== today) {
+    localStorage.setItem('cc_lastVisit', today);
   }
 }
 
@@ -64,6 +82,9 @@ function saveState() {
   localStorage.setItem(KEYS.paidCredits, state.paidCredits);
 }
 
+// ============================================================
+// USAGE CALCULATION
+// ============================================================
 function getRemainingFree() {
   const threshold = state.adWatched ? MAX_TOTAL_FREE : MAX_FREE;
   return Math.max(0, threshold - state.totalFreeUsed);
@@ -75,12 +96,15 @@ function canProcess() {
 }
 
 function getUsageFraction() {
-  if (state.paidCredits > 0) return 1;
+  if (state.paidCredits > 0) return 1; // show full bar for paid
   const threshold = state.adWatched ? MAX_TOTAL_FREE : MAX_FREE;
   const used = state.totalFreeUsed;
   return Math.max(0, (threshold - used) / threshold);
 }
 
+// ============================================================
+// USAGE UI UPDATE
+// ============================================================
 function updateUsageUI() {
   const remaining = state.paidCredits > 0 ? state.paidCredits : getRemainingFree();
   const fraction = getUsageFraction();
@@ -103,7 +127,7 @@ function updateUsageUI() {
   }
 
   if (processBtn) {
-    processBtn.disabled = !canProcess() || !state.currentFile || state.processing || !state.libraryReady;
+    processBtn.disabled = !canProcess() || !state.currentFile || state.processing;
   }
 }
 
@@ -116,6 +140,9 @@ function updateDots(count) {
   }
 }
 
+// ============================================================
+// FILE HANDLING
+// ============================================================
 function triggerUpload() {
   document.getElementById('fileInput').click();
 }
@@ -163,12 +190,14 @@ async function pasteFromClipboard() {
 }
 
 function processFile(file) {
+  // Validate type
   const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
   if (!validTypes.includes(file.type)) {
     showToast('Please upload a JPEG, PNG, or WEBP image', 'error');
     return;
   }
 
+  // Validate size (10MB)
   if (file.size > 10 * 1024 * 1024) {
     showToast('Image must be under 10MB', 'error');
     return;
@@ -207,6 +236,9 @@ function showProcessingArea(file) {
   updateUsageUI();
 }
 
+// ============================================================
+// BACKGROUND REMOVAL
+// ============================================================
 async function processImage() {
   if (!state.currentFile || state.processing) return;
 
@@ -215,16 +247,14 @@ async function processImage() {
     return;
   }
 
-  if (!state.libraryReady) {
-    showToast('AI model still loading, please wait...', 'info');
-    return;
-  }
-
   state.processing = true;
   updateUsageUI();
   setProcessingUI(true);
 
   try {
+    const lib = await loadLibrary();
+
+    // Show model progress
     const modelProgress = document.getElementById('modelProgress');
     modelProgress.classList.remove('hidden');
 
@@ -247,14 +277,14 @@ async function processImage() {
       },
     };
 
-    // المكتبة الآن متاحة في window.removeBackground
-    const blob = await window.removeBackground(state.currentFile, config);
+    const blob = await lib.removeBackground(state.currentFile, config);
 
     modelProgress.classList.add('hidden');
 
     state.resultBlob = blob;
     displayResult(blob);
 
+    // Increment counters
     state.removeCount++;
     state.totalFreeUsed = state.paidCredits > 0 ? state.totalFreeUsed : state.totalFreeUsed + 1;
     if (state.paidCredits > 0) {
@@ -265,6 +295,7 @@ async function processImage() {
 
     showToast('Background removed successfully! ✨', 'success');
 
+    // Check if should show wall
     setTimeout(() => {
       if (!canProcess()) {
         checkAndShowWall();
@@ -273,7 +304,7 @@ async function processImage() {
 
   } catch (err) {
     console.error('Processing error:', err);
-    showToast('Processing failed: ' + (err.message || 'unknown error'), 'error');
+    showToast('Processing failed. Please try again.', 'error');
     document.getElementById('modelProgress').classList.add('hidden');
   } finally {
     state.processing = false;
@@ -294,7 +325,7 @@ function setProcessingUI(loading) {
   } else {
     btnText.classList.remove('hidden');
     btnLoading.classList.add('hidden');
-    processBtn.disabled = !canProcess() || !state.currentFile || !state.libraryReady;
+    processBtn.disabled = !canProcess() || !state.currentFile;
   }
 }
 
@@ -311,6 +342,9 @@ function displayResult(blob) {
   resultActions.classList.remove('hidden');
 }
 
+// ============================================================
+// DOWNLOAD & CLIPBOARD
+// ============================================================
 function downloadResult() {
   if (!state.resultBlob) return;
   const url = URL.createObjectURL(state.resultBlob);
@@ -337,6 +371,9 @@ async function copyToClipboard() {
   }
 }
 
+// ============================================================
+// RESET
+// ============================================================
 function resetApp() {
   state.currentFile = null;
   state.resultBlob = null;
@@ -359,16 +396,24 @@ function resetApp() {
   updateUsageUI();
 }
 
+// ============================================================
+// ACCESS WALL LOGIC
+// ============================================================
 function checkAndShowWall() {
   if (canProcess()) return;
 
   if (!state.adWatched) {
+    // Offer ad
     showAdModal();
   } else {
+    // Show payment wall
     showPricingModal();
   }
 }
 
+// ============================================================
+// AD MODAL
+// ============================================================
 function showAdModal() {
   document.getElementById('adModal').classList.remove('hidden');
 }
@@ -376,7 +421,7 @@ function showAdModal() {
 function closeAdModal() {
   document.getElementById('adModal').classList.add('hidden');
   const adTimer = document.getElementById('adTimer');
-  if (adTimer) adTimer.classList.add('hidden');
+  adTimer.classList.add('hidden');
 }
 
 function startAd() {
@@ -394,7 +439,7 @@ function startAd() {
   const interval = setInterval(() => {
     seconds--;
     adCountdown.textContent = seconds;
-    if (adFill) adFill.style.width = `${((5 - seconds) / 5) * 100}%`;
+    adFill.style.width = `${((5 - seconds) / 5) * 100}%`;
 
     if (seconds <= 0) {
       clearInterval(interval);
@@ -404,19 +449,21 @@ function startAd() {
 }
 
 function completeAd() {
+  // Grant bonus images
   state.adWatched = true;
   state.adWatchedAt = new Date().toISOString();
   saveState();
 
   closeAdModal();
   updateUsageUI();
-
-  const actions = document.querySelector('#adModal .modal-actions');
-  if (actions) actions.style.display = '';
-
   showToast('🎉 You earned 3 more free removals!', 'success');
+
+  if (adActions) adActions.style.display = '';
 }
 
+// ============================================================
+// PAYMENT MODAL
+// ============================================================
 function showPricingModal() {
   document.getElementById('paymentModal').classList.remove('hidden');
 }
@@ -426,9 +473,12 @@ function closePaymentModal() {
 }
 
 function purchasePlan(plan) {
+  // DEMO: Simulate purchase
+  // PRODUCTION: Integrate Stripe/PayPal here
   const credits = plan === 'pro' ? 500 : 100;
   const price = plan === 'pro' ? '$6.95' : '$2.95';
 
+  // Simulate payment flow
   showToast(`Processing payment of ${price}…`, 'info');
 
   setTimeout(() => {
@@ -439,94 +489,83 @@ function purchasePlan(plan) {
     showToast(`✅ ${credits} credits added! Happy removing!`, 'success');
     showInfoModal('purchase-success', credits, price);
   }, 1500);
+
+  /* ─── STRIPE INTEGRATION PLACEHOLDER ───────────────────
+   *
+   * const stripe = Stripe('pk_live_YOUR_KEY_HERE');
+   * const session = await fetch('/api/create-checkout', {
+   *   method: 'POST',
+   *   body: JSON.stringify({ plan }),
+   * }).then(r => r.json());
+   * await stripe.redirectToCheckout({ sessionId: session.id });
+   *
+   * ─────────────────────────────────────────────────────── */
 }
 
-function toggleFaq(index) {
-  const items = document.querySelectorAll('.faq-item');
-  const item = items[index];
-  if (item) item.classList.toggle('open');
-}
+// ============================================================
+// LEGAL / INFO MODALS
+// ============================================================
+const legalContent = {
+  tos: `
+    <h2 style="font-family:var(--font-display);font-size:1.5rem;font-weight:800;margin-bottom:16px;">Terms of Service</h2>
+    <p style="color:var(--mid);font-size:0.85rem;margin-bottom:20px;">Last updated: December 2024</p>
+    <h3 style="margin-bottom:8px;">1. Acceptance</h3>
+    <p>By using ClearCut AI, you agree to these terms. If you disagree, please stop using the service.</p>
+    <h3 style="margin:16px 0 8px;">2. Service Description</h3>
+    <p>ClearCut AI provides AI-powered background removal using on-device processing. Images are processed locally and never uploaded to our servers.</p>
+    <h3 style="margin:16px 0 8px;">3. User Conduct</h3>
+    <p>You agree not to use the service to process illegal, harmful, or infringing content. You retain full ownership of all images you process.</p>
+    <h3 style="margin:16px 0 8px;">4. Payments</h3>
+    <p>All purchases are one-time payments. Credits do not expire. Refunds are available within 30 days per our refund policy.</p>
+    <h3 style="margin:16px 0 8px;">5. Limitation of Liability</h3>
+    <p>The service is provided "as is." We are not liable for any damages arising from use of the service.</p>
+    <h3 style="margin:16px 0 8px;">6. Changes</h3>
+    <p>We may update these terms. Continued use after changes constitutes acceptance.</p>
+  `,
+  privacy: `
+    <h2 style="font-family:var(--font-display);font-size:1.5rem;font-weight:800;margin-bottom:16px;">Privacy Policy</h2>
+    <p style="color:var(--mid);font-size:0.85rem;margin-bottom:20px;">Last updated: December 2024 · GDPR Compliant</p>
+    <h3 style="margin-bottom:8px;">Data We Collect</h3>
+    <p>We collect minimal data: usage counts (stored locally in your browser), and optional payment information processed securely by Stripe.</p>
+    <h3 style="margin:16px 0 8px;">Your Images</h3>
+    <p>Your images are <strong>never uploaded to our servers</strong>. All processing happens locally in your browser using WebAssembly technology.</p>
+    <h3 style="margin:16px 0 8px;">Cookies</h3>
+    <p>We use essential cookies for functionality and anonymous analytics cookies (only with your consent).</p>
+    <h3 style="margin:16px 0 8px;">GDPR Rights</h3>
+    <p>You have the right to access, correct, delete, or export your data. Contact us at privacy@clearcut.ai.</p>
+    <h3 style="margin:16px 0 8px;">Data Retention</h3>
+    <p>Usage data is stored in your browser's localStorage and can be cleared at any time through your browser settings.</p>
+    <h3 style="margin:16px 0 8px;">Contact</h3>
+    <p>For privacy concerns: privacy@clearcut.ai</p>
+  `,
+  refund: `
+    <h2 style="font-family:var(--font-display);font-size:1.5rem;font-weight:800;margin-bottom:16px;">Refund Policy</h2>
+    <h3 style="margin-bottom:8px;">30-Day Money Back Guarantee</h3>
+    <p>If you are not satisfied with your purchase for any reason, contact us within 30 days at support@clearcut.ai for a full refund. No questions asked.</p>
+    <h3 style="margin:16px 0 8px;">Eligibility</h3>
+    <p>All purchases are eligible for a full refund within 30 days. Partial refunds are not available after 30 days.</p>
+    <h3 style="margin:16px 0 8px;">Process</h3>
+    <p>Email support@clearcut.ai with your order confirmation. Refunds are processed within 5-10 business days.</p>
+  `,
+  dmca: `
+    <h2 style="font-family:var(--font-display);font-size:1.5rem;font-weight:800;margin-bottom:16px;">DMCA Notice</h2>
+    <p>ClearCut AI respects intellectual property rights. If you believe content infringes your copyright, please contact us.</p>
+    <h3 style="margin:16px 0 8px;">Filing a Notice</h3>
+    <p>Send DMCA notices to: dmca@clearcut.ai. Include: identification of the copyrighted work, location of infringing material, your contact information, and a statement of good faith.</p>
+  `,
+  contact: 'contact',
+};
 
-function showToast(message, type = 'info') {
-  const container = document.getElementById('toastContainer');
-  const toast = document.createElement('div');
-  toast.className = `toast ${type}`;
-  toast.textContent = message;
-  container.appendChild(toast);
-
-  setTimeout(() => {
-    toast.style.opacity = '0';
-    toast.style.transform = 'translateY(10px)';
-    toast.style.transition = 'all 0.3s ease';
-    setTimeout(() => toast.remove(), 300);
-  }, 3500);
-}
-
-function checkCookieBanner() {
-  const consent = localStorage.getItem(KEYS.cookieConsent);
-  if (consent) {
-    document.getElementById('cookieBanner').style.display = 'none';
-  }
-}
-
-function acceptCookies() {
-  localStorage.setItem(KEYS.cookieConsent, 'accepted');
-  document.getElementById('cookieBanner').style.display = 'none';
-  showToast('Preferences saved', 'success');
-}
-
-function declineCookies() {
-  localStorage.setItem(KEYS.cookieConsent, 'declined');
-  document.getElementById('cookieBanner').style.display = 'none';
-}
-
-function setupKeyboardShortcuts() {
-  document.addEventListener('keydown', async (e) => {
-    if ((e.ctrlKey || e.metaKey) && e.key === 'v') {
-      const processingArea = document.getElementById('processingArea');
-      if (!processingArea.classList.contains('hidden')) return;
-      await pasteFromClipboard();
-    }
-    if (e.key === 'Escape') {
-      closeAdModal();
-      closePaymentModal();
-      closeInfoModal();
-      document.getElementById('contactModal')?.classList.add('hidden');
-    }
-  });
-}
-
-function scrollToApp() {
-  document.getElementById('app').scrollIntoView({ behavior: 'smooth' });
-}
-
-function toggleMobileMenu() {
-  const menu = document.getElementById('mobileMenu');
-  if (menu) menu.classList.toggle('open');
-}
-
-function submitContact() {
-  const name = document.getElementById('contactName').value.trim();
-  const email = document.getElementById('contactEmail').value.trim();
-  const msg = document.getElementById('contactMsg').value.trim();
-
-  if (!name || !email || !msg) {
-    showToast('Please fill in all fields', 'warning');
+function showModal(type) {
+  event && event.preventDefault();
+  if (type === 'contact') {
+    document.getElementById('contactModal').classList.remove('hidden');
     return;
   }
-  if (!email.includes('@')) {
-    showToast('Please enter a valid email', 'error');
-    return;
-  }
-
-  console.log('Contact form:', { name, email, msg });
-
-  document.getElementById('contactModal')?.classList.add('hidden');
-  showToast('Message sent! We\'ll get back to you soon.', 'success');
-
-  document.getElementById('contactName').value = '';
-  document.getElementById('contactEmail').value = '';
-  document.getElementById('contactMsg').value = '';
+  const content = legalContent[type];
+  if (!content) return;
+  document.getElementById('infoModalContent').innerHTML = content;
+  document.getElementById('infoModal').classList.remove('hidden');
 }
 
 function closeInfoModal() {
@@ -548,13 +587,184 @@ function showInfoModal(type, ...args) {
   }
 }
 
-function showModal(type) {
-  event?.preventDefault();
-  if (type === 'contact') {
-    document.getElementById('contactModal').classList.remove('hidden');
-    return;
-  }
-  // باقي المودالات (tos, privacy...) – اختصاراً ما كريناش الكود
+// ============================================================
+// FAQ
+// ============================================================
+function toggleFaq(index) {
+  const items = document.querySelectorAll('.faq-item');
+  const item = items[index];
+  if (!item) return;
+  item.classList.toggle('open');
 }
 
+// ============================================================
+// TOAST NOTIFICATIONS
+// ============================================================
+function showToast(message, type = 'info') {
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.textContent = message;
+  container.appendChild(toast);
+
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateY(10px)';
+    toast.style.transition = 'all 0.3s ease';
+    setTimeout(() => toast.remove(), 300);
+  }, 3500);
+}
+
+// ============================================================
+// COOKIE BANNER
+// ============================================================
+function checkCookieBanner() {
+  const consent = localStorage.getItem(KEYS.cookieConsent);
+  if (consent) {
+    document.getElementById('cookieBanner').style.display = 'none';
+  }
+}
+
+function acceptCookies() {
+  localStorage.setItem(KEYS.cookieConsent, 'accepted');
+  document.getElementById('cookieBanner').style.display = 'none';
+  showToast('Preferences saved', 'success');
+}
+
+function declineCookies() {
+  localStorage.setItem(KEYS.cookieConsent, 'declined');
+  document.getElementById('cookieBanner').style.display = 'none';
+}
+
+// ============================================================
+// KEYBOARD SHORTCUTS
+// ============================================================
+function setupKeyboardShortcuts() {
+  document.addEventListener('keydown', async (e) => {
+    // Ctrl+V / Cmd+V to paste
+    if ((e.ctrlKey || e.metaKey) && e.key === 'v') {
+      const processingArea = document.getElementById('processingArea');
+      if (!processingArea.classList.contains('hidden')) return; // Already has image
+      await pasteFromClipboard();
+    }
+    // Escape to close modals
+    if (e.key === 'Escape') {
+      closeAdModal();
+      closePaymentModal();
+      closeInfoModal();
+      document.getElementById('contactModal').classList.add('hidden');
+    }
+  });
+}
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+function scrollToApp() {
+  document.getElementById('app').scrollIntoView({ behavior: 'smooth' });
+}
+
+function toggleMobileMenu() {
+  const menu = document.getElementById('mobileMenu');
+  menu.classList.toggle('open');
+}
+
+// ============================================================
+// CONTACT FORM
+// ============================================================
+function submitContact() {
+  const name = document.getElementById('contactName').value.trim();
+  const email = document.getElementById('contactEmail').value.trim();
+  const msg = document.getElementById('contactMsg').value.trim();
+
+  if (!name || !email || !msg) {
+    showToast('Please fill in all fields', 'warning');
+    return;
+  }
+  if (!email.includes('@')) {
+    showToast('Please enter a valid email', 'error');
+    return;
+  }
+
+  // PRODUCTION: Send to your API / email service
+  console.log('Contact form:', { name, email, msg });
+
+  document.getElementById('contactModal').classList.add('hidden');
+  showToast('Message sent! We\'ll get back to you soon.', 'success');
+
+  document.getElementById('contactName').value = '';
+  document.getElementById('contactEmail').value = '';
+  document.getElementById('contactMsg').value = '';
+}
+
+// ============================================================
+// ANALYTICS PLACEHOLDERS
+// ============================================================
+// PRODUCTION: Replace with real GA4 tracking
+
+function trackEvent(name, params = {}) {
+  // gtag('event', name, params);
+  console.log(`[Analytics] ${name}`, params);
+}
+
+// ============================================================
+// AD MODAL REFERENCE FIX
+// ============================================================
+// Fix reference to adActions in completeAd
+const adActionsRef = () => document.querySelector('#adModal .modal-actions');
+
+function completeAd() {
+  state.adWatched = true;
+  state.adWatchedAt = new Date().toISOString();
+  saveState();
+
+  closeAdModal();
+  updateUsageUI();
+
+  const actions = adActionsRef();
+  if (actions) actions.style.display = '';
+
+  trackEvent('ad_completed');
+  showToast('🎉 You earned 3 more free removals!', 'success');
+}
+
+// ============================================================
+// START
+// ============================================================
 document.addEventListener('DOMContentLoaded', init);
+
+/* ═══════════════════════════════════════════════════════════
+   MONETAG AD PLACEHOLDER
+   ═══════════════════════════════════════════════════════════
+   To integrate real Monetag rewarded video ads:
+   
+   1. Sign up at monetag.com
+   2. Get your Zone ID
+   3. Replace startAd() with:
+
+   function startAd() {
+     if (typeof show_monetag_ad !== 'undefined') {
+       show_monetag_ad(YOUR_ZONE_ID, {
+         onSuccess: () => completeAd(),
+         onError: () => showToast('Ad failed, try again', 'error')
+       });
+     }
+   }
+
+   4. Add to <head>:
+   <script src="//cdn.monitago.com/sdk.js"></script>
+   ═══════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════
+   GOOGLE ANALYTICS 4 PLACEHOLDER
+   ═══════════════════════════════════════════════════════════
+   Add to <head>:
+
+   <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+   <script>
+     window.dataLayer = window.dataLayer || [];
+     function gtag(){dataLayer.push(arguments);}
+     gtag('js', new Date());
+     gtag('config', 'G-XXXXXXXXXX');
+   </script>
+   ═══════════════════════════════════════════════════════════ */
