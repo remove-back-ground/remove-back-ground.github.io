@@ -7,7 +7,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Remove Bg – Professional Background Removal</title>
-  <script src="https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.4.5/dist/browser/index.js"></script>
+  <script type="module">
+  // نستورد المكتبة كـ module
+  import removeBackground from 'https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.4.5/dist/browser/index.js';
+  // نخزنها فـ window باش نقدرو نستعملوها من script.js العادي
+  window.removeBackground = removeBackground;
+  // نحدث UI باش نعرفو أن المكتبة جاهزة
+  window.dispatchEvent(new Event('libraryReady'));
+</script>
   <meta name="description" content="Remove image backgrounds instantly with AI. Free, fast, and professional quality results. No signup required." />
   <meta name="keywords" content="background removal, remove background, AI background remover, transparent background, photo editing" />
   <meta property="og:title" content="Remove Bg – Remove Backgrounds Instantly" />
