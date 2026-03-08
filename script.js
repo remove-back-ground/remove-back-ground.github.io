@@ -10,6 +10,7 @@ const AD_BONUS = 3;
 const MAX_TOTAL_FREE = 6;
 
 let state = {
+  libraryReady: false, 
   removeCount: 0,
   adWatched: false,
   adWatchedAt: null,
@@ -18,6 +19,7 @@ let state = {
   currentFile: null,
   resultBlob: null,
   processing: false,
+  libraryReady: false, 
 };
 
 // localStorage keys
@@ -44,6 +46,16 @@ function init() {
   if (lastVisit !== today) {
     localStorage.setItem('cc_lastVisit', today);
   }
+
+  // نتحقق كل 500ms إذا المكتبة تحملات
+  const checkLibrary = setInterval(() => {
+    if (window.removeBackground) {
+      state.libraryReady = true;
+      updateUsageUI();
+      console.log('✅ Library ready');
+      clearInterval(checkLibrary);
+    }
+  }, 500);
 }
 
 function loadState() {
@@ -101,8 +113,8 @@ function updateUsageUI() {
   }
 
   if (processBtn) {
-    processBtn.disabled = !canProcess() || !state.currentFile || state.processing;
-  }
+  processBtn.disabled = !canProcess() || !state.currentFile || state.processing || !state.libraryReady;
+}
 }
 
 function updateDots(count) {
@@ -213,6 +225,11 @@ async function processImage() {
 
   if (!canProcess()) {
     checkAndShowWall();
+    return;
+  }
+
+  if (!state.libraryReady) {
+    showToast('AI library not loaded yet. Please wait...', 'info');
     return;
   }
 
