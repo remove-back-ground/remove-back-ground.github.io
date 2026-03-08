@@ -1,5 +1,5 @@
 /**
- * ClearCut AI – script.js (نسخة نهائية تعتمد على script tag)
+ * ClearCut AI – script.js (نهائي مع module)
  */
 
 const MAX_FREE = 3;
@@ -15,7 +15,7 @@ let state = {
   currentFile: null,
   resultBlob: null,
   processing: false,
-  libraryReady: false, // نضيف هاد المتغير باش نعرفو وقت تحميل المكتبة
+  libraryReady: false,
 };
 
 const KEYS = {
@@ -27,34 +27,25 @@ const KEYS = {
   cookieConsent: 'cc_cookieConsent',
 };
 
-// ننتظرو حتى تتحمل المكتبة
-function waitForLibrary() {
-  return new Promise((resolve) => {
-    if (window.removeBackground) {
-      state.libraryReady = true;
-      resolve();
-    } else {
-      // نحاولو كل 100ms
-      const interval = setInterval(() => {
-        if (window.removeBackground) {
-          state.libraryReady = true;
-          clearInterval(interval);
-          resolve();
-        }
-      }, 100);
-    }
-  });
-}
+// نسمعو الحدث libraryReady
+window.addEventListener('libraryReady', () => {
+  console.log('Library ready event received');
+  state.libraryReady = true;
+  updateUsageUI();
+  // نقدرو نعطيو رسالة للمستخدم
+  showToast('AI model ready!', 'success');
+});
 
 function init() {
   loadState();
   updateUsageUI();
   setupKeyboardShortcuts();
   checkCookieBanner();
-  // نبداو نستنو المكتبة (اختياري، يمكن نظهور رسالة تحميل)
-  waitForLibrary().then(() => {
-    console.log('Library loaded');
-  });
+  // إذا المكتبة كانت محملة من قبل (يمكن تكون تزامنت)
+  if (window.removeBackground) {
+    state.libraryReady = true;
+    updateUsageUI();
+  }
 }
 
 function loadState() {
@@ -216,9 +207,6 @@ function showProcessingArea(file) {
   updateUsageUI();
 }
 
-// ============================================================
-// BACKGROUND REMOVAL (باستعمال window.removeBackground)
-// ============================================================
 async function processImage() {
   if (!state.currentFile || state.processing) return;
 
@@ -259,7 +247,7 @@ async function processImage() {
       },
     };
 
-    // استعمال الدالة العمومية
+    // المكتبة الآن متاحة في window.removeBackground
     const blob = await window.removeBackground(state.currentFile, config);
 
     modelProgress.classList.add('hidden');
