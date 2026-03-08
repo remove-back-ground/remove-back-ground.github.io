@@ -47,7 +47,7 @@ function init() {
     localStorage.setItem('cc_lastVisit', today);
   }
 
-  // نتحقق كل 500ms إذا المكتبة تحملات
+  // التحقق من المكتبة كل 200ms
   const checkLibrary = setInterval(() => {
     if (window.removeBackground) {
       state.libraryReady = true;
@@ -55,7 +55,7 @@ function init() {
       console.log('✅ Library ready');
       clearInterval(checkLibrary);
     }
-  }, 500);
+  }, 200);
 }
 
 function loadState() {
@@ -188,6 +188,7 @@ function processFile(file) {
   state.resultBlob = null;
 
   showProcessingArea(file);
+  console.log('File selected:', file.name);
 }
 
 function showProcessingArea(file) {
@@ -221,7 +222,12 @@ function showProcessingArea(file) {
 // BACKGROUND REMOVAL (باستعمال window.removeBackground)
 // ============================================================
 async function processImage() {
-  if (!state.currentFile || state.processing) return;
+  console.log('processImage called', { currentFile: state.currentFile, processing: state.processing, libraryReady: state.libraryReady });
+  
+  if (!state.currentFile || state.processing) {
+    console.log('Returning early:', { currentFile: state.currentFile, processing: state.processing });
+    return;
+  }
 
   if (!canProcess()) {
     checkAndShowWall();
