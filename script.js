@@ -1,5 +1,5 @@
 /**
- * ClearCut AI – script.js (نسخة مستقرة مع تحميل ديناميكي)
+ * ClearCut AI – script.js (نسخة نهائية تعتمد على script tag)
  */
 
 const MAX_FREE = 3;
@@ -15,6 +15,7 @@ let state = {
   currentFile: null,
   resultBlob: null,
   processing: false,
+  libraryReady: false, // نضيف هاد المتغير باش نعرفو وقت تحميل المكتبة
 };
 
 const KEYS = {
@@ -26,11 +27,34 @@ const KEYS = {
   cookieConsent: 'cc_cookieConsent',
 };
 
+// ننتظرو حتى تتحمل المكتبة
+function waitForLibrary() {
+  return new Promise((resolve) => {
+    if (window.removeBackground) {
+      state.libraryReady = true;
+      resolve();
+    } else {
+      // نحاولو كل 100ms
+      const interval = setInterval(() => {
+        if (window.removeBackground) {
+          state.libraryReady = true;
+          clearInterval(interval);
+          resolve();
+        }
+      }, 100);
+    }
+  });
+}
+
 function init() {
   loadState();
   updateUsageUI();
   setupKeyboardShortcuts();
   checkCookieBanner();
+  // نبداو نستنو المكتبة (اختياري، يمكن نظهور رسالة تحميل)
+  waitForLibrary().then(() => {
+    console.log('Library loaded');
+  });
 }
 
 function loadState() {
@@ -88,7 +112,7 @@ function updateUsageUI() {
   }
 
   if (processBtn) {
-    processBtn.disabled = !canProcess() || !state.currentFile || state.processing;
+    processBtn.disabled = !canProcess() || !state.currentFile || state.processing || !state.libraryReady;
   }
 }
 
@@ -193,35 +217,8 @@ function showProcessingArea(file) {
 }
 
 // ============================================================
-// تحميل مكتبة حذف الخلفية (ديناميكي)
+// BACKGROUND REMOVAL (باستعمال window.removeBackground)
 // ============================================================
-const LIBRARY_URL = 'https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.4.5/dist/browser/index.js';
-
-async function loadRemoveBackgroundFunction() {
-  try {
-    // نحاول نستورد المكتبة
-    const module = await import(LIBRARY_URL);
-    console.log('Library loaded:', module);
-
-    // المكتبة ممكن تكون default export أو named export
-    // نجرب نلقاو الدالة المناسبة
-    if (typeof module.default === 'function') {
-      return module.default;
-    } else if (typeof module.removeBackground === 'function') {
-      return module.removeBackground;
-    } else if (typeof module === 'function') {
-      return module;
-    } else {
-      // إذا ما لقيناش، نعرضو كلشي فـ الكونسول
-      console.error('Unexpected module exports:', module);
-      throw new Error('Could not find removeBackground function in library');
-    }
-  } catch (error) {
-    console.error('Failed to load background removal library:', error);
-    throw new Error('Failed to load AI library. Check your internet connection.');
-  }
-}
-
 async function processImage() {
   if (!state.currentFile || state.processing) return;
 
@@ -230,15 +227,16 @@ async function processImage() {
     return;
   }
 
+  if (!state.libraryReady) {
+    showToast('AI model still loading, please wait...', 'info');
+    return;
+  }
+
   state.processing = true;
   updateUsageUI();
   setProcessingUI(true);
 
   try {
-    // تحميل المكتبة
-    const removeBackground = await loadRemoveBackgroundFunction();
-
-    // إظهار شريط تقدم تحميل الموديل
     const modelProgress = document.getElementById('modelProgress');
     modelProgress.classList.remove('hidden');
 
@@ -261,15 +259,14 @@ async function processImage() {
       },
     };
 
-    // تنفيذ الإزالة
-    const blob = await removeBackground(state.currentFile, config);
+    // استعمال الدالة العمومية
+    const blob = await window.removeBackground(state.currentFile, config);
 
     modelProgress.classList.add('hidden');
 
     state.resultBlob = blob;
     displayResult(blob);
 
-    // تحديث العدادات
     state.removeCount++;
     state.totalFreeUsed = state.paidCredits > 0 ? state.totalFreeUsed : state.totalFreeUsed + 1;
     if (state.paidCredits > 0) {
@@ -288,7 +285,6 @@ async function processImage() {
 
   } catch (err) {
     console.error('Processing error:', err);
-    // عرض رسالة خطأ مفصلة
     showToast('Processing failed: ' + (err.message || 'unknown error'), 'error');
     document.getElementById('modelProgress').classList.add('hidden');
   } finally {
@@ -310,7 +306,7 @@ function setProcessingUI(loading) {
   } else {
     btnText.classList.remove('hidden');
     btnLoading.classList.add('hidden');
-    processBtn.disabled = !canProcess() || !state.currentFile;
+    processBtn.disabled = !canProcess() || !state.currentFile || !state.libraryReady;
   }
 }
 
@@ -457,9 +453,6 @@ function purchasePlan(plan) {
   }, 1500);
 }
 
-// ============================================================
-// باقي الدوال (FAQ, Toast, Cookie, إلخ) – نفس الكود القديم
-// ============================================================
 function toggleFaq(index) {
   const items = document.querySelectorAll('.faq-item');
   const item = items[index];
@@ -576,7 +569,4 @@ function showModal(type) {
   // باقي المودالات (tos, privacy...) – اختصاراً ما كريناش الكود
 }
 
-// ============================================================
-// بدء التطبيق
-// ============================================================
 document.addEventListener('DOMContentLoaded', init);
