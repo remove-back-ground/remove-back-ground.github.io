@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://clearcut.ai/sitemap.xml
+Sitemap: https://RemoveBg.ai/sitemap.xml
