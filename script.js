@@ -579,6 +579,9 @@ const legalContent = {
 };
 
 function showModal(type) {
+  document.getElementById('adModal').classList.remove('hidden');
+  const adActions = document.querySelector('#adModal .modal-actions');
+  if (adActions) adActions.style.display = '';
   event && event.preventDefault();
   if (type === 'contact') {
     document.getElementById('contactModal').classList.remove('hidden');
@@ -587,7 +590,6 @@ function showModal(type) {
   const content = legalContent[type];
   if (!content) return;
   document.getElementById('infoModalContent').innerHTML = content;
-  document.getElementById('infoModal').classList.remove('hidden');
 }
 
 function closeInfoModal() {
