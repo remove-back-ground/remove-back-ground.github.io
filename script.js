@@ -473,22 +473,16 @@ function closePaymentModal() {
 }
 
 function purchasePlan(plan) {
-  // DEMO: Simulate purchase
-  // PRODUCTION: Integrate Stripe/PayPal here
-  const credits = plan === 'pro' ? 500 : 100;
-  const price = plan === 'pro' ? '$6.95' : '$2.95';
-
-  // Simulate payment flow
-  showToast(`Processing payment of ${price}…`, 'info');
-
-  setTimeout(() => {
-    state.paidCredits += credits;
-    saveState();
-    closePaymentModal();
-    updateUsageUI();
-    showToast(`✅ ${credits} credits added! Happy removing!`, 'success');
-    showInfoModal('purchase-success', credits, price);
-  }, 1500);
+const credits = plan === 'pro' ? 500 : 100;
+const price = plan === 'pro' ? '$6.95' : '$2.95';
+showToast(`Processing payment of ${price}…`, 'info')
+setTimeout(() => {
+state.paidCredits += credits;
+saveState();
+closePaymentModal();
+updateUsageUI();
+showToast(`✅ ${credits} credits added!`, 'success');
+}, 1500);
 }
 
   let selectedPlan = null;
