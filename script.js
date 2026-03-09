@@ -1,5 +1,5 @@
 /**
- * ClearCut AI – script.js
+ * ClearCut AI – scripAt.js
  * Background Removal Web App
  * Uses @imgly/background-removal via CDN
  */
@@ -543,6 +543,23 @@ if(credits <= 0){
 credits--;
 
 localStorage.setItem("credits",credits);
+
+  function payBinance100() {
+window.location.href = "BINANCE_LINK_100";
+}
+
+function payBinance500() {
+window.location.href = "BINANCE_LINK_500";
+}
+
+function payCrypto100() {
+window.location.href = "CRYPTO_LINK_100";
+}
+
+function payCrypto500() {
+window.location.href = "CRYPTO_LINK_500";
+}
+  
   
   /* ─── STRIPE INTEGRATION PLACEHOLDER ───────────────────
    *
