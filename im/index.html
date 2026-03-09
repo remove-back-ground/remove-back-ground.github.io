@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إزالة الخلفية - بسيط</title>
+    <style>
+        body { font-family: Arial; text-align: center; padding: 20px; background: #f0f0f0; }
+        .box { background: white; max-width: 600px; margin: auto; padding: 20px; border-radius: 10px; }
+        button { background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin: 5px; }
+        button:disabled { background: #ccc; }
+        img { max-width: 100%; margin-top: 10px; border: 1px solid #ddd; background-image: repeating-linear-gradient(45deg, #ccc 0px, #ccc 10px, #eee 10px, #eee 20px); }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h2>✨ إزالة خلفية الصور</h2>
+        <p>أول 3 صور مجاناً</p>
+        <div>المتبقي: <span id="counter">3</span></div>
+        <div style="width:100%; height:10px; background:#ddd; margin:10px 0;"><div id="progress" style="height:100%; width:100%; background:#007bff;"></div></div>
+        
+        <input type="file" id="fileInput" accept="image/*" style="display:none;">
+        <button onclick="document.getElementById('fileInput').click()">📁 اختر صورة</button>
+        <button onclick="pasteFromClipboard()">📋 لصق</button>
+        
+        <div id="preview" class="hidden">
+            <h3>الأصل</h3>
+            <img id="original" src="">
+            <h3>النتيجة</h3>
+            <img id="result" src="">
+            <div id="progressBar" style="height:5px; background:#28a745; width:0%; margin:10px 0; transition:0.2s;"></div>
+            <button id="processBtn">⚡ إزالة الخلفية</button>
+            <button id="downloadBtn" class="hidden">📥 تحميل</button>
+            <button onclick="reset()">🔄 جديد</button>
+        </div>
+    </div>
+
+    <script type="module">
+        // استيراد المكتبة
+        import removeBackground from 'https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.4.5/dist/browser/index.js';
+        
+        // المتغيرات
+        const MAX_FREE = 3;
+        let removeCount = parseInt(localStorage.getItem('removeCount') || '0');
+        let currentFile = null;
+        let resultBlob = null;
+        
+        // عناصر
+        const counterSpan = document.getElementById('counter');
+        const progressDiv = document.getElementById('progress');
+        const previewDiv = document.getElementById('preview');
+        const originalImg = document.getElementById('original');
+        const resultImg = document.getElementById('result');
+        const processBtn = document.getElementById('processBtn');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const progressBar = document.getElementById('progressBar');
+        const fileInput = document.getElementById('fileInput');
+        
+        // تحديث العداد
+        function updateUI() {
+            const remaining = Math.max(0, MAX_FREE - removeCount);
+            counterSpan.textContent = remaining;
+            progressDiv.style.width = (remaining / MAX_FREE) * 100 + '%';
+            processBtn.disabled = !currentFile || remaining === 0;
+        }
+        updateUI();
+        
+        // رفع ملف
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            if (!file.type.startsWith('image/')) return alert('هذا ليس ملف صورة');
+            if (file.size > 10*1024*1024) return alert('الحجم أكبر من 10 ميغابايت');
+            
+            currentFile = file;
+            const reader = new FileReader();
+            reader.onload = (e) => { originalImg.src = e.target.result; };
+            reader.readAsDataURL(file);
+            
+            previewDiv.classList.remove('hidden');
+            resultImg.src = '';
+            downloadBtn.classList.add('hidden');
+            updateUI();
+        });
+        
+        // لصق
+        window.pasteFromClipboard = async () => {
+            try {
+                const items = await navigator.clipboard.read();
+                for (const item of items) {
+                    const imageType = item.types.find(t => t.startsWith('image/'));
+                    if (imageType) {
+                        const blob = await item.getType(imageType);
+                        const file = new File([blob], 'pasted.png', { type: imageType });
+                        const reader = new FileReader();
+                        reader.onload = (e) => { originalImg.src = e.target.result; };
+                        reader.readAsDataURL(file);
+                        currentFile = file;
+                        previewDiv.classList.remove('hidden');
+                        resultImg.src = '';
+                        downloadBtn.classList.add('hidden');
+                        updateUI();
+                        return;
+                    }
+                }
+                alert('ما لقيتش صورة فالحافظة');
+            } catch { alert('تعذرت القراءة من الحافظة'); }
+        };
+        
+        // معالجة
+        processBtn.addEventListener('click', async () => {
+            if (!currentFile || removeCount >= MAX_FREE) return;
+            
+            processBtn.disabled = true;
+            progressBar.style.width = '0%';
+            
+            try {
+                const blob = await removeBackground(currentFile, {
+                    progress: (_, current, total) => {
+                        if (total > 0) progressBar.style.width = (current / total) * 100 + '%';
+                    }
+                });
+                
+                resultBlob = blob;
+                resultImg.src = URL.createObjectURL(blob);
+                downloadBtn.classList.remove('hidden');
+                
+                removeCount++;
+                localStorage.setItem('removeCount', removeCount);
+                updateUI();
+                
+            } catch (err) {
+                console.error(err);
+                alert('حدث خطأ، حاول مرة أخرى');
+                processBtn.disabled = false;
+            }
+        });
+        
+        // تحميل
+        downloadBtn.addEventListener('click', () => {
+            if (!resultBlob) return;
+            const url = URL.createObjectURL(resultBlob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'removed.png';
+            a.click();
+            URL.revokeObjectURL(url);
+        });
+        
+        // إعادة تعيين
+        window.reset = () => {
+            currentFile = null;
+            resultBlob = null;
+            previewDiv.classList.add('hidden');
+            fileInput.value = '';
+            originalImg.src = '';
+            resultImg.src = '';
+            downloadBtn.classList.add('hidden');
+            updateUI();
+        };
+    </script>
+</body>
+</html>
