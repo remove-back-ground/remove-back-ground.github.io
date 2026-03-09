@@ -525,6 +525,30 @@
     </div>
   </div>
 
+  <div class="plans">
+  <div class="plan">
+    <h3>Starter</h3>
+    <p>100 Images</p>
+    <h2>$2.95</h2>
+    <button onclick="buyPlan('starter')">Get Pro</button>
+  </div>
+
+  <div class="plan">
+    <h3>Pro</h3>
+    <p>500 Images</p>
+    <h2>$6.95</h2>
+    <button onclick="buyPlan('pro')">Get Pro</button>
+  </div>
+</div>
+
+  <div id="paymentModal" class="modal">
+  <div class="modal-content">
+    <h2>Choose payment method</h2>
+    <button onclick="payPaypal()">Pay with PayPal</button>
+    <button onclick="payCrypto()">Pay with Binance (USDT)</button>
+  </div>
+</div>
+  
   <div id="paymentModal" class="payment-modal" style="display:none">
   <div class="payment-box">
     <h2>Choose Payment Method</h2>
