@@ -514,16 +514,6 @@ window.location.href =
 "https://pay.binance.com/YYYY";
 }
   
-  /* ─── STRIPE INTEGRATION PLACEHOLDER ───────────────────
-   *
-   * const stripe = Stripe('pk_live_YOUR_KEY_HERE');
-   * const session = await fetch('/api/create-checkout', {
-   *   method: 'POST',
-   *   body: JSON.stringify({ plan }),
-   * }).then(r => r.json());
-   * await stripe.redirectToCheckout({ sessionId: session.id });
-   *
-   * ─────────────────────────────────────────────────────── */
 // ============================================================
 // LEGAL / INFO MODALS
 // ============================================================
