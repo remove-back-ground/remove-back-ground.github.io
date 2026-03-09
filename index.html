@@ -525,6 +525,23 @@
     </div>
   </div>
 
+  <div id="paymentModal" class="payment-modal" style="display:none">
+  <div class="payment-box">
+    <h2>Choose Payment Method</h2>
+    <button id="paypalBtn">Pay with PayPal</button>
+    <button id="cryptoBtn">Pay with Binance (USDT)</button>
+    <div id="cryptoBox" style="display:none">
+      <h3>Send 5 USDT (TRC20)</h3>
+      <img src="binance-qr.png" width="200">
+      <p>Wallet address:</p>
+      <code>TXXXXXXXXXXXX</code>
+      <p>After payment click confirm</p>
+      <button id="confirmCrypto">I Paid</button>
+    </div>
+    <div id="paypal-button-container"></div>
+  </div>
+</div>
+
   <script src="script.js"></script>
 </body>
 </html>
