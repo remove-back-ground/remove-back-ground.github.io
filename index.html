@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,300&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
   <style>
-    /* ===== التصميم الأساسي (من ملفك القدمع) ===== */
+    /* ===== التصميم الأساسي (كما كان) ===== */
     * { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
       --font: 'DM Sans', sans-serif;
@@ -108,7 +108,7 @@
     .btn-download, .btn-copy, .btn-new { background: white; border: 1px solid #e5e7eb; padding: 0.75rem 1.5rem; border-radius: 40px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem; }
     .btn-download:hover, .btn-copy:hover, .btn-new:hover { background: #f3f4f6; }
 
-    /* باقي الأقسام (اختصاراً) */
+    /* باقي الأقسام (مختصرة) */
     .section-container { max-width: 1200px; margin: 0 auto; padding: 4rem 2rem; }
     .section-label { text-align: center; color: #4F8EF7; font-weight: 600; margin-bottom: 1rem; }
     .section-title { font-family: var(--font-display); font-size: 2.5rem; font-weight: 800; text-align: center; margin-bottom: 3rem; }
@@ -117,8 +117,6 @@
     .pricing-featured { border: 2px solid #4F8EF7; transform: scale(1.02); }
     .plan-badge { background: #4F8EF7; color: white; padding: 0.25rem 1rem; border-radius: 40px; display: inline-block; margin-bottom: 1rem; }
     .plan-price { font-size: 2.5rem; font-weight: 800; }
-    .plan-currency { font-size: 1rem; vertical-align: super; }
-    .plan-cents { font-size: 1rem; }
     .btn-plan { background: var(--gradient); color: white; border: none; padding: 0.75rem 2rem; border-radius: 40px; font-weight: 600; cursor: pointer; margin-top: 1.5rem; }
     .faq-item { border-bottom: 1px solid #e5e7eb; }
     .faq-q { width: 100%; text-align: left; background: none; border: none; padding: 1.5rem 0; font-weight: 600; display: flex; justify-content: space-between; cursor: pointer; }
@@ -154,17 +152,17 @@
         <a href="#pricing">Pricing</a>
         <a href="#how-it-works">How it Works</a>
         <a href="#faq">FAQ</a>
-        <button class="btn-nav-cta" onclick="scrollToApp()">Try Free</button>
+        <button class="btn-nav-cta" onclick="window.scrollToApp()">Try Free</button>
       </div>
-      <button class="nav-hamburger" id="navHamburger" onclick="toggleMobileMenu()">
+      <button class="nav-hamburger" id="navHamburger" onclick="window.toggleMobileMenu()">
         <span></span><span></span><span></span>
       </button>
     </nav>
     <div class="mobile-menu" id="mobileMenu">
-      <a href="#pricing" onclick="toggleMobileMenu()">Pricing</a>
-      <a href="#how-it-works" onclick="toggleMobileMenu()">How it Works</a>
-      <a href="#faq" onclick="toggleMobileMenu()">FAQ</a>
-      <button class="btn-nav-cta" onclick="scrollToApp(); toggleMobileMenu()">Try Free →</button>
+      <a href="#pricing" onclick="window.toggleMobileMenu()">Pricing</a>
+      <a href="#how-it-works" onclick="window.toggleMobileMenu()">How it Works</a>
+      <a href="#faq" onclick="window.toggleMobileMenu()">FAQ</a>
+      <button class="btn-nav-cta" onclick="window.scrollToApp(); window.toggleMobileMenu()">Try Free →</button>
     </div>
   </header>
 
@@ -180,7 +178,7 @@
       <h1 class="hero-title">Remove Backgrounds<br/><span class="gradient-text">In Seconds</span></h1>
       <p class="hero-subtitle">Professional-quality background removal powered by on-device AI. Your images never leave your browser.</p>
       <div class="hero-cta">
-        <button class="btn-primary" onclick="scrollToApp()">Remove Background Free →</button>
+        <button class="btn-primary" onclick="window.scrollToApp()">Remove Background Free →</button>
         <span class="hero-note">3 free images · No credit card</span>
       </div>
       <div class="hero-stats">
@@ -225,24 +223,24 @@
             </svg>
           </div>
           <h3 class="upload-title">Drop your image here</h3>
-          <p class="upload-sub">or <span class="upload-link" onclick="triggerUpload()">click to browse</span></p>
+          <p class="upload-sub">or <span class="upload-link" onclick="window.triggerUpload()">click to browse</span></p>
           <p class="upload-hint">JPEG, PNG, WEBP · Max 10MB</p>
         </div>
         <div class="upload-alt">
-          <button class="btn-paste" onclick="pasteFromClipboard()">
+          <button class="btn-paste" onclick="window.pasteFromClipboard()">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 2H13C13.5523 2 14 2.44772 14 3V13C14 13.5523 13.5523 14 13 14H3C2.44772 14 2 13.5523 2 13V3C2 2.44772 2.44772 2 3 2H6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><rect x="5" y="1" width="6" height="3" rx="1" stroke="currentColor" stroke-width="1.5"/></svg>
             Paste from clipboard
           </button>
           <span class="upload-alt-hint">Ctrl+V / ⌘V</span>
         </div>
-        <input type="file" id="fileInput" accept="image/jpeg,image/png,image/webp" style="display:none" onchange="handleFileSelect(event)" />
+        <input type="file" id="fileInput" accept="image/jpeg,image/png,image/webp" style="display:none" />
       </div>
 
       <!-- Processing Area (hidden initially) -->
       <div class="processing-area hidden" id="processingArea">
         <div class="image-controls">
           <div class="image-meta" id="imageMeta"></div>
-          <button class="btn-reset" onclick="resetApp()">
+          <button class="btn-reset" onclick="window.resetApp()">
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 7C1 3.686 3.686 1 7 1c1.879 0 3.565.826 4.728 2.143M13 7C13 10.314 10.314 13 7 13c-1.879 0-3.565-.826-4.728-2.143" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M11 1v3.5H7.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
             Reset
           </button>
@@ -279,7 +277,7 @@
     </div>
   </section>
 
-  <!-- باقي الأقسام (How it Works, Pricing, FAQ, Testimonials, Footer) -->
+  <!-- باقي الأقسام (مختصرة) -->
   <section class="how-section" id="how-it-works">...</section>
   <section class="pricing-section" id="pricing">...</section>
   <section class="testimonials-section">...</section>
@@ -292,6 +290,7 @@
   <script type="module">
     // ======================== استيراد المكتبة ========================
     import removeBackground from 'https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.4.5/dist/browser/index.js';
+    console.log('✅ Library loaded in module');
 
     // ======================== المتغيرات العامة ========================
     const MAX_FREE = 3;
@@ -320,7 +319,17 @@
     const copyBtn = document.getElementById('copyBtn');
     const newBtn = document.getElementById('newBtn');
 
-    // تحديث واجهة العداد
+    // ======================== دالة عرض التوست ========================
+    function showToast(msg, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.textContent = msg;
+      container.appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
+    }
+
+    // ======================== تحديث الواجهة ========================
     function updateUI() {
       const remaining = Math.max(0, MAX_FREE - removeCount);
       counterSpan.textContent = remaining;
@@ -328,7 +337,7 @@
       processBtn.disabled = !(currentFile && !processing && remaining > 0);
     }
 
-    // رفع الملف
+    // ======================== رفع الملف ========================
     function handleFile(file) {
       if (!file.type.startsWith('image/')) {
         showToast('الرجاء اختيار صورة', 'error');
@@ -354,30 +363,14 @@
       resultActions.classList.add('hidden');
       processingArea.classList.remove('hidden');
 
-      // عرض معلومات الصورة
       const sizeMB = (file.size / 1024 / 1024).toFixed(2);
       imageMeta.textContent = `${file.name} · ${sizeMB}MB`;
       updateUI();
     }
 
-    // أحداث السحب والإفلات
-    uploadZone.addEventListener('click', () => fileInput.click());
-    uploadZone.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      uploadZone.classList.add('drag-over');
-    });
-    uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag-over'));
-    uploadZone.addEventListener('drop', (e) => {
-      e.preventDefault();
-      uploadZone.classList.remove('drag-over');
-      const file = e.dataTransfer.files[0];
-      if (file) handleFile(file);
-    });
-    fileInput.addEventListener('change', (e) => {
-      if (e.target.files[0]) handleFile(e.target.files[0]);
-    });
+    // ======================== دوال onclick (نربطها بـ window) ========================
+    window.triggerUpload = () => fileInput.click();
 
-    // لصق من الحافظة
     window.pasteFromClipboard = async () => {
       try {
         const items = await navigator.clipboard.read();
@@ -396,7 +389,42 @@
       }
     };
 
-    // معالجة الصورة
+    window.resetApp = () => {
+      currentFile = null;
+      resultBlob = null;
+      processingArea.classList.add('hidden');
+      fileInput.value = '';
+      originalImg.style.display = 'none';
+      originalPlaceholder.style.display = 'flex';
+      resultImg.style.display = 'none';
+      resultPlaceholder.style.display = 'flex';
+      resultActions.classList.add('hidden');
+      updateUI();
+    };
+
+    window.scrollToApp = () => document.getElementById('app').scrollIntoView({ behavior: 'smooth' });
+
+    window.toggleMobileMenu = () => document.getElementById('mobileMenu').classList.toggle('open');
+
+    // ======================== أحداث السحب والإفلات ========================
+    uploadZone.addEventListener('click', window.triggerUpload);
+    uploadZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      uploadZone.classList.add('drag-over');
+    });
+    uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag-over'));
+    uploadZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadZone.classList.remove('drag-over');
+      const file = e.dataTransfer.files[0];
+      if (file) handleFile(file);
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files[0]) handleFile(e.target.files[0]);
+    });
+
+    // ======================== معالجة الصورة ========================
     processBtn.addEventListener('click', async () => {
       if (!currentFile || processing || removeCount >= MAX_FREE) return;
 
@@ -437,7 +465,7 @@
       }
     });
 
-    // تحميل النتيجة
+    // ======================== أزرار النتيجة ========================
     downloadBtn.addEventListener('click', () => {
       if (!resultBlob) return;
       const url = URL.createObjectURL(resultBlob);
@@ -448,7 +476,6 @@
       URL.revokeObjectURL(url);
     });
 
-    // نسخ الصورة
     copyBtn.addEventListener('click', async () => {
       if (!resultBlob) return;
       try {
@@ -459,42 +486,10 @@
       }
     });
 
-    // صورة جديدة
-    newBtn.addEventListener('click', resetApp);
-    function resetApp() {
-      currentFile = null;
-      resultBlob = null;
-      processingArea.classList.add('hidden');
-      fileInput.value = '';
-      originalImg.style.display = 'none';
-      originalPlaceholder.style.display = 'flex';
-      resultImg.style.display = 'none';
-      resultPlaceholder.style.display = 'flex';
-      resultActions.classList.add('hidden');
-      updateUI();
-    }
+    newBtn.addEventListener('click', window.resetApp);
 
-    // إظهار التوست
-    function showToast(msg, type = 'info') {
-      const container = document.getElementById('toastContainer');
-      const toast = document.createElement('div');
-      toast.className = `toast ${type}`;
-      toast.textContent = msg;
-      container.appendChild(toast);
-      setTimeout(() => toast.remove(), 3000);
-    }
-
-    // التهيئة
+    // ======================== التهيئة ========================
     updateUI();
-
-    // دوال إضافية للهيدر
-    window.scrollToApp = () => document.getElementById('app').scrollIntoView({ behavior: 'smooth' });
-    window.toggleMobileMenu = () => document.getElementById('mobileMenu').classList.toggle('open');
-    window.triggerUpload = () => fileInput.click();
-    window.handleFileSelect = (e) => { if (e.target.files[0]) handleFile(e.target.files[0]); };
   </script>
-
-  <!-- باقي الأقسام المكررة (لإكمال التصميم) -->
-  <!-- يمكنك إضافة المحتوى الكامل لـ how-it-works, pricing, FAQ هنا كما كان لديك -->
 </body>
 </html>
