@@ -57,6 +57,8 @@ function init() {
   }, 200);
 }
 
+window.removeBackground = removeBackground;
+
 function loadState() {
   state.removeCount = parseInt(localStorage.getItem(KEYS.removeCount) || '0');
   state.adWatched = localStorage.getItem(KEYS.adWatched) === 'true';
