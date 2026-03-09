@@ -530,21 +530,10 @@
     </div>
   </div>
 
- <script type="module">
+<script type="module">
 import { removeBackground } from "https://cdn.jsdelivr.net/npm/@imgly/background-removal/+esm";
 
-const input = document.getElementById("fileInput");
-const result = document.getElementById("result");
-
-input.addEventListener("change", async (event) => {
-  const file = event.target.files[0];
-  console.log("File selected:", file.name);
-
-  const blob = await removeBackground(file);
-  const url = URL.createObjectURL(blob);
-
-  result.src = url;
-});
+window.removeBackground = removeBackground;
 </script>
   <script src="script.js"></script>
 </body>
