@@ -9,8 +9,7 @@ const MAX_FREE = 3;
 const AD_BONUS = 3;
 const MAX_TOTAL_FREE = 6;
 
-let state = {
-  libraryReady: false, 
+let state = { 
   removeCount: 0,
   adWatched: false,
   adWatchedAt: null,
@@ -272,7 +271,7 @@ async function processImage() {
       },
     };
 
-    const blob = await window.removeBackground(state.currentFile, config);
+    const blob = await window.removeBackground(state.currentFile);
 
     modelProgress.classList.add('hidden');
 
