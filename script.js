@@ -490,6 +490,60 @@ function purchasePlan(plan) {
     showInfoModal('purchase-success', credits, price);
   }, 1500);
 
+  let selectedPlan = null;
+
+function buyPlan(plan) {
+  selectedPlan = plan;
+  document.getElementById("paymentModal").style.display = "block";
+}
+
+  function payPaypal(){
+
+ if(selectedPlan === "starter"){
+   window.location.href = "PAYPAL_LINK_2.95";
+ }
+
+ if(selectedPlan === "pro"){
+   window.location.href = "PAYPAL_LINK_6.95";
+ }
+
+}
+
+  function payCrypto(){
+
+ if(selectedPlan === "starter"){
+   alert("Send 2.95 USDT to this address: YOUR_WALLET");
+ }
+
+ if(selectedPlan === "pro"){
+   alert("Send 6.95 USDT to this address: YOUR_WALLET");
+ }
+
+}
+
+  function activatePlan(plan){
+
+ if(plan === "starter"){
+   localStorage.setItem("credits",100);
+ }
+
+ if(plan === "pro"){
+   localStorage.setItem("credits",500);
+ }
+
+}
+
+  let credits = localStorage.getItem("credits") || 0;
+
+if(credits <= 0){
+ alert("No credits left");
+ return;
+}
+
+credits--;
+
+localStorage.setItem("credits",credits);
+  
   /* ─── STRIPE INTEGRATION PLACEHOLDER ───────────────────
    *
    * const stripe = Stripe('pk_live_YOUR_KEY_HERE');
