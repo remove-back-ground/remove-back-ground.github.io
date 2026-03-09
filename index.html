@@ -476,32 +476,6 @@
     </div>
   </div>
 
-  <!-- Payment Modal -->
-  <div class="modal-overlay hidden" id="paymentModal">
-    <div class="modal-card modal-wide">
-      <button class="modal-close" onclick="closePaymentModal()">✕</button>
-      <div class="modal-icon">🚀</div>
-      <h2 class="modal-title">Unlock More Removals</h2>
-      <p class="modal-desc">You've used all your free images. Get more with a one-time purchase.</p>
-      <div class="modal-pricing-grid">
-        <div class="modal-plan">
-          <div class="modal-plan-name">Starter</div>
-          <div class="modal-plan-price">$2.95</div>
-          <div class="modal-plan-desc">100 images</div>
-          <button class="btn-plan" onclick="purchasePlan('basic')">Buy Now</button>
-        </div>
-        <div class="modal-plan modal-plan-featured">
-          <div class="modal-plan-badge">Best Value</div>
-          <div class="modal-plan-name">Pro</div>
-          <div class="modal-plan-price">$6.95</div>
-          <div class="modal-plan-desc">500 images</div>
-          <button class="btn-plan btn-plan-featured" onclick="purchasePlan('pro')">Buy Now</button>
-        </div>
-      </div>
-      <div class="modal-trust">🔒 SSL · ↩️ 30-day refund · 💳 Stripe</div>
-    </div>
-  </div>
-
   <!-- Generic Info Modal (TOS, Privacy, etc.) -->
   <div class="modal-overlay hidden" id="infoModal">
     <div class="modal-card modal-wide modal-scroll">
@@ -525,88 +499,45 @@
     </div>
   </div>
 
-  <div class="pricing">
+ <!-- Payment Modal -->
+<div class="modal-overlay hidden" id="paymentModal">
 
-  <div class="plan">
-    <h2>Basic Plan</h2>
-    <p>100 Images</p>
-    <p>$2.95</p>
+<div class="modal">
 
-    <button onclick="payBinance100()">Pay with Binance</button>
-    <button onclick="payCrypto100()">Pay with Crypto</button>
-  </div>
+<h2>Pay with Crypto</h2>
+<p>Select your plan</p>
 
-  <div class="plan">
-    <h2>Pro Plan</h2>
-    <p>500 Images</p>
-    <p>$6.95</p>
-
-    <button onclick="payBinance500()">Pay with Binance</button>
-    <button onclick="payCrypto500()">Pay with Crypto</button>
-  </div>
-
-</div>
-  
-  <div class="plans">
-  <div class="plan">
-    <h3>Starter</h3>
-    <p>100 Images</p>
-    <h2>$2.95</h2>
-    <button onclick="buyPlan('starter')">Get Pro</button>
-  </div>
-
-  <div class="plan">
-    <h3>Pro</h3>
-    <p>500 Images</p>
-    <h2>$6.95</h2>
-    <button onclick="buyPlan('pro')">Get Pro</button>
-  </div>
-</div>
-
-  <div class="plan">
-<h2>Pro Plan</h2>
-<p>100 Images - $2.95</p>
-
-<a href="https://pay.binance.com/YOUR_LINK_100" target="_blank">
-<button>Pay with Crypto</button>
-</a>
-
-</div>
-
+<div class="plans">
 
 <div class="plan">
-<h2>Pro Plus</h2>
-<p>500 Images - $6.95</p>
+<h3>Starter</h3>
+<p>$2.95</p>
+<p>100 Images</p>
 
-<a href="https://pay.binance.com/YOUR_LINK_500" target="_blank">
-<button>Pay with Crypto</button>
-</a>
+<button onclick="payCrypto100()">
+Pay with Binance / Crypto
+</button>
 
 </div>
-  
-  <div id="paymentModal" class="modal">
-  <div class="modal-content">
-    <h2>Choose payment method</h2>
-    <button onclick="payCrypto()">Pay with Binance (USDT)</button>
-  </div>
-</div>
-  
-  <div id="paymentModal" class="payment-modal" style="display:none">
-  <div class="payment-box">
-    <h2>Choose Payment Method</h2>
-    <button id="cryptoBtn">Pay with Binance (USDT)</button>
-    <div id="cryptoBox" style="display:none">
-      <h3>Send 5 USDT (TRC20)</h3>
-      <img src="binance-qr.png" width="200">
-      <p>Wallet address:</p>
-      <code>TXXXXXXXXXXXX</code>
-      <p>After payment click confirm</p>
-      <button id="confirmCrypto">I Paid</button>
-    </div>
-    <div id="paypal-button-container"></div>
-  </div>
+
+<div class="plan">
+
+<h3>Pro</h3>
+<p>$6.95</p>
+<p>500 Images</p>
+
+<button onclick="payCrypto500()">
+Pay with Binance / Crypto
+</button>
+
 </div>
 
+</div>
+
+<button onclick="closePaymentModal()">Cancel</button>
+
+</div>
+</div>
   <script src="script.js"></script>
 </body>
 </html>
