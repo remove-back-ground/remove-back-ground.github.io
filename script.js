@@ -418,11 +418,7 @@ function showAdModal() {
   document.getElementById('adModal').classList.remove('hidden');
 }
 
-function closeAdModal() {
-  document.getElementById('adModal').classList.add('hidden');
-  const adTimer = document.getElementById('adTimer');
-  adTimer.classList.add('hidden');
-}
+let adInterval; // عرفها برّا الدالة باش تكون عامة
 
 function startAd() {
   const adTimer = document.getElementById('adTimer');
@@ -436,16 +432,25 @@ function startAd() {
   let seconds = 5;
   adCountdown.textContent = seconds;
 
-  const interval = setInterval(() => {
+  adInterval = setInterval(() => {
     seconds--;
     adCountdown.textContent = seconds;
     adFill.style.width = `${((5 - seconds) / 5) * 100}%`;
 
     if (seconds <= 0) {
-      clearInterval(interval);
+      clearInterval(adInterval);
       completeAd();
     }
   }, 1000);
+}
+
+function closeAdModal() {
+  clearInterval(adInterval); // أوقف المؤقت
+  document.getElementById('adModal').classList.add('hidden');
+  document.getElementById('adTimer').classList.add('hidden');
+  // أرجع عرض الأزرار للمودال القادم
+  const adActions = document.querySelector('#adModal .modal-actions');
+  if (adActions) adActions.style.display = '';
 }
 
 function completeAd() {
@@ -578,11 +583,8 @@ const legalContent = {
   contact: 'contact',
 };
 
-function showModal(type) {
-  document.getElementById('adModal').classList.remove('hidden');
-  const adActions = document.querySelector('#adModal .modal-actions');
-  if (adActions) adActions.style.display = '';
-  event && event.preventDefault();
+function showModal(type, event) {
+  event?.preventDefault(); // باش مايحاولش ينتقل للرابط
   if (type === 'contact') {
     document.getElementById('contactModal').classList.remove('hidden');
     return;
@@ -590,6 +592,7 @@ function showModal(type) {
   const content = legalContent[type];
   if (!content) return;
   document.getElementById('infoModalContent').innerHTML = content;
+  document.getElementById('infoModal').classList.remove('hidden');
 }
 
 function closeInfoModal() {
