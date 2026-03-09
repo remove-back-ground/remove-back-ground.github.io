@@ -7,7 +7,7 @@
 // ============================================================
 // DYNAMIC CDN IMPORT
 // ============================================================
-const LIBRARY_URL = 'https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.4.5/dist/browser/index.js';
+const LIBRARY_URL = "https://cdn.jsdelivr.net/npm/@imgly/background-removal/+esm";
 let imglyLib = null;
 
 async function loadLibrary() {
@@ -507,7 +507,10 @@ function purchasePlan(plan) {
 // ============================================================
 const legalContent = {
   tos: `
-    <h2 style="font-family:var(--font-display);font-size:1.5rem;font-weight:800;margin-bottom:16px;">Terms of Service</h2>
+    <h2 style="font-family:var(--font-display);font-size:1.5rem;font-weight:800;margin-bottom:16px;">
+    Terms of Service
+    </h2>
+    <p>By using ClearCut AI you agree...</p>
     <p style="color:var(--mid);font-size:0.85rem;margin-bottom:20px;">Last updated: December 2024</p>
     <h3 style="margin-bottom:8px;">1. Acceptance</h3>
     <p>By using ClearCut AI, you agree to these terms. If you disagree, please stop using the service.</p>
