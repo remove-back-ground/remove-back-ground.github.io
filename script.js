@@ -458,7 +458,6 @@ function completeAd() {
   updateUsageUI();
   showToast('🎉 You earned 3 more free removals!', 'success');
 
-  if (adActions) adActions.style.display = '';
 }
 
 // ============================================================
