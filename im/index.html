@@ -39,6 +39,7 @@
     <script type="module">
         // استيراد المكتبة
         import removeBackground from 'https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.4.5/dist/browser/index.js';
+        console.log('✅ مكتبة الإزالة تحملت');
         
         // المتغيرات
         const MAX_FREE = 3;
@@ -57,35 +58,51 @@
         const progressBar = document.getElementById('progressBar');
         const fileInput = document.getElementById('fileInput');
         
+        console.log('عناصر DOM:', { counterSpan, progressDiv, previewDiv, originalImg, resultImg, processBtn, downloadBtn, progressBar, fileInput });
+        
         // تحديث العداد
         function updateUI() {
             const remaining = Math.max(0, MAX_FREE - removeCount);
             counterSpan.textContent = remaining;
             progressDiv.style.width = (remaining / MAX_FREE) * 100 + '%';
             processBtn.disabled = !currentFile || remaining === 0;
+            console.log('updateUI: currentFile=', !!currentFile, 'remaining=', remaining);
         }
         updateUI();
         
         // رفع ملف
         fileInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
+            console.log('تم اختيار ملف:', file);
             if (!file) return;
-            if (!file.type.startsWith('image/')) return alert('هذا ليس ملف صورة');
-            if (file.size > 10*1024*1024) return alert('الحجم أكبر من 10 ميغابايت');
+            if (!file.type.startsWith('image/')) {
+                alert('هذا ليس ملف صورة');
+                return;
+            }
+            if (file.size > 10*1024*1024) {
+                alert('الحجم أكبر من 10 ميغابايت');
+                return;
+            }
             
             currentFile = file;
             const reader = new FileReader();
-            reader.onload = (e) => { originalImg.src = e.target.result; };
+            reader.onload = (e) => {
+                console.log('تمت قراءة الصورة، ستعرض الآن');
+                originalImg.src = e.target.result;
+                originalImg.style.display = 'block'; // تأكد من إظهارها
+            };
             reader.readAsDataURL(file);
             
             previewDiv.classList.remove('hidden');
             resultImg.src = '';
+            resultImg.style.display = 'none';
             downloadBtn.classList.add('hidden');
             updateUI();
         });
         
         // لصق
         window.pasteFromClipboard = async () => {
+            console.log('محاولة اللصق من الحافظة');
             try {
                 const items = await navigator.clipboard.read();
                 for (const item of items) {
@@ -94,22 +111,30 @@
                         const blob = await item.getType(imageType);
                         const file = new File([blob], 'pasted.png', { type: imageType });
                         const reader = new FileReader();
-                        reader.onload = (e) => { originalImg.src = e.target.result; };
+                        reader.onload = (e) => {
+                            originalImg.src = e.target.result;
+                            originalImg.style.display = 'block';
+                        };
                         reader.readAsDataURL(file);
                         currentFile = file;
                         previewDiv.classList.remove('hidden');
                         resultImg.src = '';
+                        resultImg.style.display = 'none';
                         downloadBtn.classList.add('hidden');
                         updateUI();
                         return;
                     }
                 }
                 alert('ما لقيتش صورة فالحافظة');
-            } catch { alert('تعذرت القراءة من الحافظة'); }
+            } catch (err) {
+                console.error('خطأ في اللصق:', err);
+                alert('تعذرت القراءة من الحافظة');
+            }
         };
         
         // معالجة
         processBtn.addEventListener('click', async () => {
+            console.log('بدء معالجة الصورة', currentFile);
             if (!currentFile || removeCount >= MAX_FREE) return;
             
             processBtn.disabled = true;
@@ -118,12 +143,18 @@
             try {
                 const blob = await removeBackground(currentFile, {
                     progress: (_, current, total) => {
-                        if (total > 0) progressBar.style.width = (current / total) * 100 + '%';
+                        if (total > 0) {
+                            const percent = (current / total) * 100;
+                            progressBar.style.width = percent + '%';
+                            console.log('تقدم المعالجة:', percent);
+                        }
                     }
                 });
                 
+                console.log('تمت المعالجة، حجم النتيجة:', blob.size);
                 resultBlob = blob;
                 resultImg.src = URL.createObjectURL(blob);
+                resultImg.style.display = 'block';
                 downloadBtn.classList.remove('hidden');
                 
                 removeCount++;
@@ -131,7 +162,7 @@
                 updateUI();
                 
             } catch (err) {
-                console.error(err);
+                console.error('خطأ في المعالجة:', err);
                 alert('حدث خطأ، حاول مرة أخرى');
                 processBtn.disabled = false;
             }
@@ -150,6 +181,7 @@
         
         // إعادة تعيين
         window.reset = () => {
+            console.log('إعادة تعيين');
             currentFile = null;
             resultBlob = null;
             previewDiv.classList.add('hidden');
