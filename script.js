@@ -736,20 +736,6 @@ function trackEvent(name, params = {}) {
 // Fix reference to adActions in completeAd
 const adActionsRef = () => document.querySelector('#adModal .modal-actions');
 
-function completeAd() {
-  state.adWatched = true;
-  state.adWatchedAt = new Date().toISOString();
-  saveState();
-
-  closeAdModal();
-  updateUsageUI();
-
-  const actions = adActionsRef();
-  if (actions) actions.style.display = '';
-
-  trackEvent('ad_completed');
-  showToast('🎉 You earned 3 more free removals!', 'success');
-}
 // ============================================================
 // START
 // ============================================================
