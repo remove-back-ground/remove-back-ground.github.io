@@ -10,7 +10,7 @@ const SUPABASE_URL = 'https://rhnahtyjrnpnrtjrnocp.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_H19x6_h9zIKPkbCSxGC6JQ_eGcM4e8m';
 
 // Initialize Supabase (CDN loaded in HTML)
-const { createClient } = supabase;
+const { createClient } = window.supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // ============================================================
