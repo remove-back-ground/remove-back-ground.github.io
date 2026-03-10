@@ -3,13 +3,7 @@
  * Background Removal Web App
  * Uses @imgly/background-removal via CDN
  */
-const SUPABASE_URL = "https://rhnahtyjrnpnrtjrnocp.supabase.co"
-const SUPABASE_KEY = "sb_publishable_H19x6_h9zIKPkbCSxGC6JQ_eGcM4e8m"
 
-const supabaseClient = supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_KEY
-)
 // ============================================================
 // DYNAMIC CDN IMPORT
 // ============================================================
@@ -25,65 +19,6 @@ async function loadLibrary() {
     console.error('Failed to load background removal library:', e);
     throw new Error('Could not load AI library. Check your connection.');
   }
-}
-
-function openAuthModal(){
-document
-.getElementById("authModal")
-.classList.remove("hidden")
-}
-
-async function signup(email,password){
-const {data,error} = await supabaseClient.auth.signUp({
-email:email,
-password:password
-})
-if(error){
-showToast(error.message,"error")
-return
-}
-showToast("Account created","success")
-}
-
-async function createCredits(){
-const { data: { user } } = await supabaseClient.auth.getUser()
-await supabaseClient
-.from("credits")
-.insert([
-{
-id:user.id,
-credits:0
-}
-])
-}
-
-async function login(email,password){
-const {data,error} = await supabaseClient.auth.signInWithPassword({
-email:email,
-password:password
-})
-if(error){
-showToast(error.message,"error")
-return
-}
-loadCredits()
-}
-
-
-async function loadCredits(){
-const { data: { user } } = await supabaseClient.auth.getUser()
-const { data } = await supabaseClient
-.from("credits")
-.select("credits")
-.eq("id",user.id)
-.single()
-state.paidCredits = data.credits
-updateUsageUI()
-}
-
-async function logout(){
-await supabaseClient.auth.signOut()
-showToast("Logged out","info")
 }
 
 // ============================================================
@@ -129,14 +64,6 @@ function init() {
   if (lastVisit !== today) {
     localStorage.setItem('cc_lastVisit', today);
   }
-}
-
-function checkPayment(){
-const params = new URLSearchParams(window.location.search)
-const plan = params.get("plan")
-if(plan){
-addCredits(plan)
-}
 }
 
 function loadState() {
@@ -586,24 +513,15 @@ window.open(url, "_blank");
 }
 
 function payNexa(){
+
 const url = selectedPlan === 'pro'
 ? "https://nexapay.one/checkout/order_264b5b1168862f013b3a98ac4b9ee7bd?sig=plsig_7c7d4c7c2652638bf96f17a0c991196277bdb10e1a45a003ec5e52e48ed6b24c"
 : "https://nexapay.one/checkout/order_97e23449f4632a11d858866e4618709c?sig=plsig_2135dcefcd4a1beb7b0fd9cf94f92023194de07ea0079dd9fa07c32856b837b4";
+
 window.open(url, "_blank");
-}
 
-
-async function addCredits(plan){
-const { data: { user } } = await supabaseClient.auth.getUser()
-let credits = 0
-if(plan==="basic") credits = 100
-if(plan==="pro") credits = 500
-await supabaseClient
-.from("credits")
-.update({credits: state.paidCredits + credits})
-.eq("id",user.id)
-loadCredits()
 }
+  
 // ============================================================
 // LEGAL / INFO MODALS
 // ============================================================
