@@ -3,7 +3,13 @@
  * Background Removal Web App
  * Uses @imgly/background-removal via CDN
  */
+const SUPABASE_URL = "https://rhnahtyjrnpnrtjrnocp.supabase.co"
+const SUPABASE_KEY = "sb_publishable_H19x6_h9zIKPkbCSxGC6JQ_eGcM4e8m"
 
+const supabaseClient = supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+)
 // ============================================================
 // DYNAMIC CDN IMPORT
 // ============================================================
