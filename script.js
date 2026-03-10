@@ -76,6 +76,10 @@ state.paidCredits = data.credits
 updateUsageUI()
 }
 
+async function logout(){
+await supabaseClient.auth.signOut()
+showToast("Logged out","info")
+}
 
 // ============================================================
 // STATE
