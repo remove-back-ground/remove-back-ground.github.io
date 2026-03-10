@@ -505,13 +505,13 @@ document
   function payCrypto100(){
 
 window.location.href =
-"https://pay.binance.com/XXXX";
+"https://s.binance.com/uA7xJblU";
 
 }
 
 function payCrypto500(){
 window.location.href =
-"https://pay.binance.com/YYYY";
+"https://s.binance.com/yVwuf5uT";
 }
   
 // ============================================================
