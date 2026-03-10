@@ -51,11 +51,6 @@
         <a href="#pricing">Pricing</a>
         <a href="#how-it-works">How it Works</a>
         <a href="#faq">FAQ</a>
-        
-        <button onclick="openAuthModal()" class="btn-nav-cta">
-Login / Sign Up
-</button>
-        
         <button class="btn-nav-cta" onclick="scrollToApp()">Try Free</button>
       </div>
       <button class="nav-hamburger" id="navHamburger" onclick="toggleMobileMenu()">
@@ -541,19 +536,6 @@ Cancel
 
 </div>
 </div>
-
-  <!-- AUTH MODAL -->
-<div class="modal-overlay hidden" id="authModal">
-<div class="modal-card">
-<h2>Account</h2>
-<input id="authEmail" placeholder="Email" class="form-input">
-<input id="authPassword" type="password" placeholder="Password" class="form-input">
-<button class="btn-primary" onclick="signup()">Sign Up</button>
-<button class="btn-secondary" onclick="login()">Login</button>
-</div>
-</div>
-  
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="script.js"></script>
 </body>
 </html>
