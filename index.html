@@ -536,6 +536,19 @@ Cancel
 
 </div>
 </div>
+
+  <!-- AUTH MODAL -->
+<div class="modal-overlay hidden" id="authModal">
+<div class="modal-card">
+<h2>Account</h2>
+<input id="authEmail" placeholder="Email" class="form-input">
+<input id="authPassword" type="password" placeholder="Password" class="form-input">
+<button class="btn-primary" onclick="signup()">Sign Up</button>
+<button class="btn-secondary" onclick="login()">Login</button>
+</div>
+</div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="script.js"></script>
 </body>
