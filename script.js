@@ -502,16 +502,24 @@ document
 .classList.add("hidden");
 }
 
-  function payCrypto100(){
+function payBinance(){
 
-window.location.href =
-"https://s.binance.com/uA7xJblU";
+const url = selectedPlan === 'pro'
+? "https://s.binance.com/yVwuf5uT"
+: "https://s.binance.com/uA7xJblU";
+
+window.open(url, "_blank");
 
 }
 
-function payCrypto500(){
-window.location.href =
-"https://s.binance.com/yVwuf5uT";
+function payNexa(){
+
+const url = selectedPlan === 'pro'
+? "https://nexapay.one/checkout/order_264b5b1168862f013b3a98ac4b9ee7bd?sig=plsig_7c7d4c7c2652638bf96f17a0c991196277bdb10e1a45a003ec5e52e48ed6b24c"
+: "https://nexapay.one/checkout/order_97e23449f4632a11d858866e4618709c?sig=plsig_2135dcefcd4a1beb7b0fd9cf94f92023194de07ea0079dd9fa07c32856b837b4";
+
+window.open(url, "_blank");
+
 }
   
 // ============================================================
