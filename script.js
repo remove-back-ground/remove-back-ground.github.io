@@ -40,6 +40,17 @@ return
 showToast("Account created","success")
 }
 
+async function createCredits(){
+const { data: { user } } = await supabaseClient.auth.getUser()
+await supabaseClient
+.from("credits")
+.insert([
+{
+id:user.id,
+credits:0
+}
+])
+}
 
 async function login(email,password){
 const {data,error} = await supabaseClient.auth.signInWithPassword({
