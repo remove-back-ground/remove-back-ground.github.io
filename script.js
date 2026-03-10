@@ -27,6 +27,45 @@ async function loadLibrary() {
   }
 }
 
+
+async function signup(email,password){
+const {data,error} = await supabaseClient.auth.signUp({
+email:email,
+password:password
+})
+if(error){
+showToast(error.message,"error")
+return
+}
+showToast("Account created","success")
+}
+
+
+async function login(email,password){
+const {data,error} = await supabaseClient.auth.signInWithPassword({
+email:email,
+password:password
+})
+if(error){
+showToast(error.message,"error")
+return
+}
+loadCredits()
+}
+
+
+async function loadCredits(){
+const { data: { user } } = await supabaseClient.auth.getUser()
+const { data } = await supabaseClient
+.from("credits")
+.select("credits")
+.eq("id",user.id)
+.single()
+state.paidCredits = data.credits
+updateUsageUI()
+}
+
+
 // ============================================================
 // STATE
 // ============================================================
@@ -70,6 +109,14 @@ function init() {
   if (lastVisit !== today) {
     localStorage.setItem('cc_lastVisit', today);
   }
+}
+
+function checkPayment(){
+const params = new URLSearchParams(window.location.search)
+const plan = params.get("plan")
+if(plan){
+addCredits(plan)
+}
 }
 
 function loadState() {
@@ -519,15 +566,24 @@ window.open(url, "_blank");
 }
 
 function payNexa(){
-
 const url = selectedPlan === 'pro'
 ? "https://nexapay.one/checkout/order_264b5b1168862f013b3a98ac4b9ee7bd?sig=plsig_7c7d4c7c2652638bf96f17a0c991196277bdb10e1a45a003ec5e52e48ed6b24c"
 : "https://nexapay.one/checkout/order_97e23449f4632a11d858866e4618709c?sig=plsig_2135dcefcd4a1beb7b0fd9cf94f92023194de07ea0079dd9fa07c32856b837b4";
-
 window.open(url, "_blank");
-
 }
-  
+
+
+async function addCredits(plan){
+const { data: { user } } = await supabaseClient.auth.getUser()
+let credits = 0
+if(plan==="basic") credits = 100
+if(plan==="pro") credits = 500
+await supabaseClient
+.from("credits")
+.update({credits: state.paidCredits + credits})
+.eq("id",user.id)
+loadCredits()
+}
 // ============================================================
 // LEGAL / INFO MODALS
 // ============================================================
