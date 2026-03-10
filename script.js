@@ -27,6 +27,11 @@ async function loadLibrary() {
   }
 }
 
+function openAuthModal(){
+document
+.getElementById("authModal")
+.classList.remove("hidden")
+}
 
 async function signup(email,password){
 const {data,error} = await supabaseClient.auth.signUp({
