@@ -298,7 +298,7 @@
       <div class="trust-badges">
         <div class="trust-badge">🔒 SSL Secured</div>
         <div class="trust-badge">💳 Stripe Payments</div>
-        <div class="trust-badge">↩️ 30-day refund</div>
+        <div class="trust-badge">↩️ 30 day refund</div>
         <div class="trust-badge">🌍 GDPR Compliant</div>
       </div>
     </div>
@@ -503,42 +503,36 @@
     </div>
   </div>
   
- <!-- Payment Modal -->
+<!-- Payment Modal -->
 <div class="modal-overlay hidden" id="paymentModal">
-  
-<div class="modal">
 
-<h2>Pay with Crypto</h2>
-<p>Select your plan</p>
+<div class="modal-card payment-card">
 
-<div class="plans">
+<h2 class="modal-title">Complete Your Purchase</h2>
+<p class="modal-desc">Choose your preferred payment method</p>
 
-<div class="plan">
-<h3>Starter</h3>
-<p>$2.95</p>
-<p>100 Images</p>
+<div class="payment-methods">
 
-<button onclick="payCrypto100()">
-Pay with Binance / Crypto
+<button class="payment-method" onclick="payBinance()">
+<div class="payment-icon">🟡</div>
+<div>
+<strong>Binance Pay</strong>
+<span>Fast crypto payment</span>
+</div>
 </button>
 
+<button class="payment-method" onclick="payNexa()">
+<div class="payment-icon">💎</div>
+<div>
+<strong>NexaPay</strong>
+<span>Secure blockchain payment</span>
 </div>
-
-<div class="plan">
-
-<h3>Pro</h3>
-<p>$6.95</p>
-<p>500 Images</p>
-
-<button onclick="payCrypto500()">
-Pay with Binance / Crypto
 </button>
-
 </div>
 
-</div>
-
-<button onclick="closePaymentModal()">Cancel</button>
+<button class="btn-secondary" onclick="closePaymentModal()">
+Cancel
+</button>
 
 </div>
 </div>
