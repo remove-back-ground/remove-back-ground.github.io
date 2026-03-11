@@ -1072,6 +1072,18 @@ body {
 .form-input:focus, .form-textarea:focus { border-color: var(--indigo); background: white; }
 .form-textarea { resize: vertical; min-height: 100px; }
 
+.hero-auth-btns {
+  display: none;
+  gap: 10px;
+  margin-top: 12px;
+  justify-content: center;
+}
+@media (max-width: 768px) {
+  .hero-auth-btns {
+    display: flex;
+  }
+}
+
 /* ---- UTILITIES ---- */
 .hidden { display: none !important; }
 
