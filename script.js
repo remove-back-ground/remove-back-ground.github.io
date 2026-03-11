@@ -1,16 +1,14 @@
 /**
  * ClearCut AI – script.js
- * Supabase Auth + Credits System + Payment Polling
+ * Simple & Clean Version
  */
 
 // ============================================================
-// SUPABASE CONFIG — ضع بياناتك هنا
+// SUPABASE CONFIG
 // ============================================================
 const SUPABASE_URL = 'https://rhnahtyjrnpnrtjrnocp.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_H19x6_h9zIKPkbCSxGC6JQ_eGcM4e8m';
-
-// Initialize Supabase (CDN loaded in HTML)
-const { createClient } = supabase;
+const { createClient } = window.supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // ============================================================
@@ -21,12 +19,8 @@ let imglyLib = null;
 
 async function loadLibrary() {
   if (imglyLib) return imglyLib;
-  try {
-    imglyLib = await import(LIBRARY_URL);
-    return imglyLib;
-  } catch (e) {
-    throw new Error('Could not load AI library. Check your connection.');
-  }
+  imglyLib = await import(LIBRARY_URL);
+  return imglyLib;
 }
 
 // ============================================================
@@ -36,20 +30,21 @@ const MAX_FREE = 3;
 
 let state = {
   user: null,
-  profile: null,         // { id, email, credits, free_used }
+  profile: null,
   currentFile: null,
   resultBlob: null,
   processing: false,
-  paymentPolling: null,  // interval reference
+  paymentPolling: null,
 };
+
+let selectedPlan = null;
+let paymentSessionId = localStorage.getItem('cc_payment_session') || null;
 
 // ============================================================
 // INIT
 // ============================================================
 async function init() {
-  // Load Supabase auth
   const { data: { session } } = await db.auth.getSession();
-
   if (session?.user) {
     state.user = session.user;
     await loadProfile();
@@ -60,15 +55,19 @@ async function init() {
   setupKeyboardShortcuts();
   checkCookieBanner();
 
-  // Listen for auth changes
+  // If there's a pending payment session, start polling
+  if (paymentSessionId && state.user) {
+    startPaymentPolling();
+  }
+
   db.auth.onAuthStateChange(async (event, session) => {
     if (event === 'SIGNED_IN' && session?.user) {
       state.user = session.user;
       await loadProfile();
-      // Create profile if first Google login
       if (!state.profile) await createProfile(session.user);
       updateAuthUI();
       updateUsageUI();
+      if (paymentSessionId) startPaymentPolling();
     } else if (event === 'SIGNED_OUT') {
       state.user = null;
       state.profile = null;
@@ -79,7 +78,7 @@ async function init() {
 }
 
 // ============================================================
-// PROFILE MANAGEMENT
+// PROFILE
 // ============================================================
 async function loadProfile() {
   if (!state.user) return;
@@ -110,68 +109,59 @@ async function saveProfile() {
 // AUTH UI
 // ============================================================
 function updateAuthUI() {
-  // Find or create auth button in nav
-  let authBtn = document.getElementById('authNavBtn');
+  const authBtn = document.getElementById('authNavBtn');
   if (!authBtn) return;
 
   if (state.user) {
-    const email = state.user.email || '';
-    const initial = email.charAt(0).toUpperCase();
-    authBtn.innerHTML = `
-      <div class="user-avatar" onclick="toggleUserMenu()">${initial}</div>
-    `;
+    const initial = (state.user.email || 'U').charAt(0).toUpperCase();
+    authBtn.innerHTML = `<div class="user-avatar" onclick="toggleUserMenu()">${initial}</div>`;
   } else {
     authBtn.innerHTML = `<button class="btn-nav-cta" onclick="window.location.href='auth.html'">Sign In</button>`;
   }
 }
 
 function toggleUserMenu() {
-  let menu = document.getElementById('userDropdown');
-  if (!menu) {
-    menu = document.createElement('div');
-    menu.id = 'userDropdown';
-    menu.className = 'user-dropdown';
-    menu.innerHTML = `
-      <div class="user-dropdown-email">${state.user?.email || ''}</div>
-      <div class="user-dropdown-credits">
-        💳 ${getCreditsDisplay()} credits remaining
-      </div>
-      <hr style="border:none;border-top:1px solid #e5e7eb;margin:8px 0">
-      <button onclick="doSignOut()">Sign Out</button>
-    `;
-    document.body.appendChild(menu);
+  const existing = document.getElementById('userDropdown');
+  if (existing) { existing.remove(); return; }
 
-    // Position near avatar
-    const avatar = document.querySelector('.user-avatar');
-    if (avatar) {
-      const rect = avatar.getBoundingClientRect();
-      menu.style.top = (rect.bottom + 8 + window.scrollY) + 'px';
-      menu.style.right = '20px';
-    }
+  const menu = document.createElement('div');
+  menu.id = 'userDropdown';
+  menu.className = 'user-dropdown';
+  menu.innerHTML = `
+    <div class="user-dropdown-email">${state.user?.email || ''}</div>
+    <div class="user-dropdown-credits">💳 ${getCreditsDisplay()} credits</div>
+    <hr style="border:none;border-top:1px solid #e5e7eb;margin:8px 0">
+    <button onclick="doSignOut()">Sign Out</button>
+  `;
+  document.body.appendChild(menu);
 
-    document.addEventListener('click', closeUserMenuOnOutside, { once: true });
-  } else {
-    menu.remove();
+  const avatar = document.querySelector('.user-avatar');
+  if (avatar) {
+    const rect = avatar.getBoundingClientRect();
+    menu.style.position = 'fixed';
+    menu.style.top = (rect.bottom + 8) + 'px';
+    menu.style.right = '20px';
+    menu.style.zIndex = '9999';
   }
-}
 
-function closeUserMenuOnOutside(e) {
-  const menu = document.getElementById('userDropdown');
-  if (menu && !menu.contains(e.target)) menu.remove();
+  setTimeout(() => {
+    document.addEventListener('click', function handler(e) {
+      if (!menu.contains(e.target)) { menu.remove(); document.removeEventListener('click', handler); }
+    });
+  }, 100);
 }
 
 async function doSignOut() {
   await db.auth.signOut();
   document.getElementById('userDropdown')?.remove();
-  showToast('Signed out successfully', 'info');
+  showToast('Signed out', 'info');
 }
 
 // ============================================================
-// CREDITS CALCULATION
+// CREDITS
 // ============================================================
 function getCreditsDisplay() {
   if (!state.user) {
-    // Guest mode: use localStorage fallback
     const freeUsed = parseInt(localStorage.getItem('cc_free_used') || '0');
     return Math.max(0, MAX_FREE - freeUsed);
   }
@@ -180,7 +170,6 @@ function getCreditsDisplay() {
 
 function canProcess() {
   if (!state.user) {
-    // Guest: max 3 free
     const freeUsed = parseInt(localStorage.getItem('cc_free_used') || '0');
     return freeUsed < MAX_FREE;
   }
@@ -198,18 +187,11 @@ function updateUsageUI() {
   const processBtn = document.getElementById('processBtn');
 
   if (usageCount) usageCount.textContent = remaining;
-  if (usageLabel) {
-    usageLabel.textContent = state.user ? 'Credits remaining' : 'Free images remaining';
-  }
+  if (usageLabel) usageLabel.textContent = state.user ? 'Credits remaining' : 'Free images remaining';
 
-  // Fill bar
-  const maxShow = state.user ? Math.min(remaining, 100) : MAX_FREE;
-  const pct = state.user
-    ? Math.min(100, (remaining / 100) * 100)
-    : (remaining / MAX_FREE) * 100;
-  if (usageFill) usageFill.style.width = `${pct}%`;
+  const pct = state.user ? Math.min(100, (remaining / 10) * 100) : (remaining / MAX_FREE) * 100;
+  if (usageFill) usageFill.style.width = `${Math.max(0, pct)}%`;
 
-  // Dots (for guest)
   if (!state.user) {
     for (let i = 0; i < 3; i++) {
       const dot = document.getElementById(`dot${i}`);
@@ -223,7 +205,7 @@ function updateUsageUI() {
 }
 
 // ============================================================
-// FILE HANDLING (unchanged)
+// FILE HANDLING
 // ============================================================
 function triggerUpload() {
   document.getElementById('fileInput').click();
@@ -260,20 +242,18 @@ async function pasteFromClipboard() {
       const imageType = item.types.find(t => t.startsWith('image/'));
       if (imageType) {
         const blob = await item.getType(imageType);
-        const file = new File([blob], 'pasted-image.png', { type: imageType });
-        processFile(file);
+        processFile(new File([blob], 'pasted-image.png', { type: imageType }));
         return;
       }
     }
     showToast('No image found in clipboard', 'warning');
   } catch (e) {
-    showToast('Could not read clipboard. Try Ctrl+V in the upload zone.', 'warning');
+    showToast('Could not read clipboard.', 'warning');
   }
 }
 
 function processFile(file) {
-  const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
-  if (!validTypes.includes(file.type)) {
+  if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
     showToast('Please upload a JPEG, PNG, or WEBP image', 'error');
     return;
   }
@@ -287,27 +267,20 @@ function processFile(file) {
 }
 
 function showProcessingArea(file) {
-  const uploadArea = document.getElementById('uploadArea');
-  const processingArea = document.getElementById('processingArea');
-  const originalImg = document.getElementById('originalImg');
-  const imageMeta = document.getElementById('imageMeta');
-  const resultActions = document.getElementById('resultActions');
-  const resultImgWrap = document.getElementById('resultImgWrap');
-  const resultPlaceholder = document.getElementById('resultPlaceholder');
-
   const url = URL.createObjectURL(file);
+  const originalImg = document.getElementById('originalImg');
   originalImg.src = url;
   originalImg.onload = () => {
     const { naturalWidth: w, naturalHeight: h } = originalImg;
     const sizeMB = (file.size / 1024 / 1024).toFixed(2);
-    imageMeta.textContent = `${w} × ${h}px · ${sizeMB}MB · ${file.type.split('/')[1].toUpperCase()}`;
+    document.getElementById('imageMeta').textContent = `${w} × ${h}px · ${sizeMB}MB · ${file.type.split('/')[1].toUpperCase()}`;
   };
 
-  uploadArea.classList.add('hidden');
-  processingArea.classList.remove('hidden');
-  resultActions.classList.add('hidden');
-  resultImgWrap.classList.add('hidden');
-  resultPlaceholder.classList.remove('hidden');
+  document.getElementById('uploadArea').classList.add('hidden');
+  document.getElementById('processingArea').classList.remove('hidden');
+  document.getElementById('resultActions').classList.add('hidden');
+  document.getElementById('resultImgWrap').classList.add('hidden');
+  document.getElementById('resultPlaceholder').classList.remove('hidden');
   updateUsageUI();
 }
 
@@ -328,47 +301,41 @@ async function processImage() {
 
   try {
     const lib = await loadLibrary();
-    const modelProgress = document.getElementById('modelProgress');
-    modelProgress.classList.remove('hidden');
+    document.getElementById('modelProgress').classList.remove('hidden');
 
-    const config = {
+    const blob = await lib.removeBackground(state.currentFile, {
       model: 'medium',
       debug: false,
       proxyToWorker: true,
       fetchArgs: { mode: 'cors', cache: 'force-cache' },
       progress: (key, current, total) => {
-        const fill = document.getElementById('modelProgressFill');
-        const label = document.getElementById('modelProgressLabel');
         if (total > 0) {
           const pct = Math.round((current / total) * 100);
-          fill.style.width = `${pct}%`;
-          label.textContent = `Loading AI model… ${pct}%`;
+          document.getElementById('modelProgressFill').style.width = `${pct}%`;
+          document.getElementById('modelProgressLabel').textContent = `Loading AI model… ${pct}%`;
         }
       },
-    };
+    });
 
-    const blob = await lib.removeBackground(state.currentFile, config);
-    modelProgress.classList.add('hidden');
+    document.getElementById('modelProgress').classList.add('hidden');
     state.resultBlob = blob;
     displayResult(blob);
 
-    // === DEDUCT CREDIT ===
+    // Deduct credit
     if (state.user && state.profile) {
       state.profile.credits = Math.max(0, (state.profile.credits || 0) - 1);
       await saveProfile();
     } else {
-      // Guest: localStorage
       const freeUsed = parseInt(localStorage.getItem('cc_free_used') || '0');
       localStorage.setItem('cc_free_used', freeUsed + 1);
     }
 
     updateUsageUI();
-    showToast('Background removed successfully! ✨', 'success');
-
+    showToast('Background removed! ✨', 'success');
     setTimeout(() => { if (!canProcess()) checkAndShowWall(); }, 1500);
 
   } catch (err) {
-    console.error('Processing error:', err);
+    console.error(err);
     showToast('Processing failed. Please try again.', 'error');
     document.getElementById('modelProgress').classList.add('hidden');
   } finally {
@@ -379,23 +346,14 @@ async function processImage() {
 }
 
 function setProcessingUI(loading) {
-  const processBtn = document.getElementById('processBtn');
-  const btnText = processBtn.querySelector('.btn-process-text');
-  const btnLoading = processBtn.querySelector('.btn-process-loading');
-  if (loading) {
-    btnText.classList.add('hidden');
-    btnLoading.classList.remove('hidden');
-    processBtn.disabled = true;
-  } else {
-    btnText.classList.remove('hidden');
-    btnLoading.classList.add('hidden');
-    processBtn.disabled = !canProcess() || !state.currentFile;
-  }
+  const btn = document.getElementById('processBtn');
+  btn.querySelector('.btn-process-text').classList.toggle('hidden', loading);
+  btn.querySelector('.btn-process-loading').classList.toggle('hidden', !loading);
+  btn.disabled = loading;
 }
 
 function displayResult(blob) {
-  const url = URL.createObjectURL(blob);
-  document.getElementById('resultImg').src = url;
+  document.getElementById('resultImg').src = URL.createObjectURL(blob);
   document.getElementById('resultPlaceholder').classList.add('hidden');
   document.getElementById('resultImgWrap').classList.remove('hidden');
   document.getElementById('resultActions').classList.remove('hidden');
@@ -406,25 +364,22 @@ function displayResult(blob) {
 // ============================================================
 function downloadResult() {
   if (!state.resultBlob) return;
-  const url = URL.createObjectURL(state.resultBlob);
   const a = document.createElement('a');
-  a.href = url;
-  const name = state.currentFile ? state.currentFile.name.replace(/\.[^.]+$/, '') : 'result';
-  a.download = `${name}-clearcut.png`;
+  a.href = URL.createObjectURL(state.resultBlob);
+  a.download = `${(state.currentFile?.name || 'result').replace(/\.[^.]+$/, '')}-clearcut.png`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-  showToast('Downloading your image!', 'success');
+  showToast('Downloading!', 'success');
 }
 
 async function copyToClipboard() {
   if (!state.resultBlob) return;
   try {
     await navigator.clipboard.write([new ClipboardItem({ 'image/png': state.resultBlob })]);
-    showToast('Image copied to clipboard!', 'success');
+    showToast('Copied!', 'success');
   } catch (e) {
-    showToast('Copy failed. Try downloading instead.', 'error');
+    showToast('Copy failed. Try downloading.', 'error');
   }
 }
 
@@ -443,11 +398,11 @@ function resetApp() {
   document.getElementById('resultImgWrap').classList.add('hidden');
   document.getElementById('resultPlaceholder').classList.remove('hidden');
 
-  const processBtn = document.getElementById('processBtn');
-  if (processBtn) {
-    processBtn.querySelector('.btn-process-text').classList.remove('hidden');
-    processBtn.querySelector('.btn-process-loading').classList.add('hidden');
-    processBtn.disabled = true;
+  const btn = document.getElementById('processBtn');
+  if (btn) {
+    btn.querySelector('.btn-process-text').classList.remove('hidden');
+    btn.querySelector('.btn-process-loading').classList.add('hidden');
+    btn.disabled = true;
   }
   updateUsageUI();
 }
@@ -458,40 +413,31 @@ function resetApp() {
 function checkAndShowWall() {
   if (canProcess()) return;
   if (!state.user) {
-    // Guest: encourage sign up
-    showSignupWallModal();
+    showSignupWall();
   } else {
-    showPricingModal();
+    document.getElementById('pricing').scrollIntoView({ behavior: 'smooth' });
   }
 }
 
-function showSignupWallModal() {
-  // Show a modal encouraging sign up to get more credits
+function showSignupWall() {
   const modal = document.getElementById('adModal');
   if (!modal) return;
-
   modal.querySelector('.modal-title').textContent = "You've used your 3 free images!";
-  modal.querySelector('.modal-desc').innerHTML = `
-    <strong>Create a free account</strong> to get more credits, or upgrade for unlimited access.
-  `;
+  modal.querySelector('.modal-desc').innerHTML = `<strong>Create a free account</strong> to get more credits.`;
   const actions = modal.querySelector('.modal-actions');
   actions.innerHTML = `
     <button class="btn-primary" onclick="window.location.href='auth.html'">🔐 Sign Up Free</button>
-    <button class="btn-secondary" onclick="closeAdModal(); showPricingModal()">View Plans</button>
+    <button class="btn-secondary" onclick="closeAdModal()">Maybe later</button>
   `;
   modal.classList.remove('hidden');
 }
 
 // ============================================================
-// PAYMENT — MODAL + POLLING
+// PAYMENT
 // ============================================================
-let selectedPlan = null;
-// Store a unique payment session ID per attempt
-let paymentSessionId = localStorage.getItem('cc_payment_session') || null;
-
 function openPaymentModal(plan) {
   if (!state.user) {
-    showToast('Please sign in to purchase credits', 'warning');
+    showToast('Please sign in first', 'warning');
     setTimeout(() => window.location.href = 'auth.html', 1200);
     return;
   }
@@ -502,75 +448,73 @@ function openPaymentModal(plan) {
 function closePaymentModal() {
   document.getElementById('paymentModal').classList.add('hidden');
   stopPaymentPolling();
+  // Reset modal UI
+  const modal = document.getElementById('paymentModal');
+  const methods = modal.querySelector('.payment-methods');
+  if (methods) methods.style.display = '';
+  modal.querySelector('.modal-desc').textContent = 'Choose your preferred payment method';
 }
 
 function payBinance() {
   const url = selectedPlan === 'pro'
     ? "https://s.binance.com/yVwuf5uT"
     : "https://s.binance.com/uA7xJblU";
-
-  // Generate a session ID to track this payment attempt
-  paymentSessionId = generateSessionId();
-  localStorage.setItem('cc_payment_session', paymentSessionId);
-  savePaymentSession(paymentSessionId, selectedPlan);
-
-  window.open(url, "_blank");
-  startPaymentPolling();
-  showPaymentPendingUI();
+  startPayment(url);
 }
 
 function payNexa() {
   const url = selectedPlan === 'pro'
     ? "https://nexapay.one/checkout/order_264b5b1168862f013b3a98ac4b9ee7bd?sig=plsig_7c7d4c7c2652638bf96f17a0c991196277bdb10e1a45a003ec5e52e48ed6b24c"
     : "https://nexapay.one/checkout/order_97e23449f4632a11d858866e4618709c?sig=plsig_2135dcefcd4a1beb7b0fd9cf94f92023194de07ea0079dd9fa07c32856b837b4";
+  startPayment(url);
+}
 
-  paymentSessionId = generateSessionId();
+async function startPayment(url) {
+  // Generate session ID
+  paymentSessionId = 'ps_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
   localStorage.setItem('cc_payment_session', paymentSessionId);
-  savePaymentSession(paymentSessionId, selectedPlan);
 
-  window.open(url, "_blank");
-  startPaymentPolling();
-  showPaymentPendingUI();
-}
-
-function generateSessionId() {
-  return 'ps_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-}
-
-// Save pending payment to Supabase
-async function savePaymentSession(sessionId, plan) {
-  console.log('savePaymentSession called:', sessionId, plan, state.user?.id);
-  if (!state.user) { console.log('No user!'); return; }
-  const { data, error } = await db.from('payment_sessions').insert({
-    id: sessionId,
+  // Save to Supabase
+  await db.from('payment_sessions').insert({
+    id: paymentSessionId,
     user_id: state.user.id,
-    plan: plan,
-    credits: plan === 'pro' ? 500 : 100,
+    plan: selectedPlan,
+    credits: selectedPlan === 'pro' ? 500 : 100,
     status: 'pending',
     created_at: new Date().toISOString()
   });
-  console.log('Insert result:', data, 'Error:', error);
+
+  // Open payment page
+  window.open(url, '_blank');
+
+  // Show pending UI
+  showPaymentPendingUI();
+
+  // Start polling
+  startPaymentPolling();
 }
 
-// Show UI that payment is pending
 function showPaymentPendingUI() {
   const modal = document.getElementById('paymentModal');
-  modal.querySelector('.payment-methods').style.display = 'none';
+  const methods = modal.querySelector('.payment-methods');
+  if (methods) methods.style.display = 'none';
+
+  const credits = selectedPlan === 'pro' ? 500 : 100;
+  const price = selectedPlan === 'pro' ? '$6.95' : '$2.95';
+
   modal.querySelector('.modal-desc').innerHTML = `
-    <div style="text-align:center;padding:20px 0;">
+    <div style="text-align:center;padding:16px 0;">
       <div style="font-size:2.5rem;margin-bottom:12px;">⏳</div>
-      <p style="font-weight:600;color:#0f0f17;margin-bottom:8px;">Waiting for payment…</p>
-      <p style="color:#6b7280;font-size:0.88rem;">Complete payment in the opened tab.<br/>This page will update automatically.</p>
-      <div class="polling-dots" style="margin-top:16px;">
-        <span style="animation:blink 1s infinite 0s">●</span>
-        <span style="animation:blink 1s infinite 0.3s">●</span>
-        <span style="animation:blink 1s infinite 0.6s">●</span>
-      </div>
+      <p style="font-weight:700;color:#0f0f17;margin-bottom:6px;">Waiting for payment…</p>
+      <p style="color:#6b7280;font-size:0.85rem;margin-bottom:4px;">Plan: <strong>${selectedPlan === 'pro' ? 'Pro' : 'Starter'}</strong> · ${credits} credits · ${price}</p>
+      <p style="color:#6b7280;font-size:0.85rem;">Complete payment in the opened tab.</p>
+      <div style="margin:16px 0;color:#4F8EF7;font-size:1.2rem;letter-spacing:4px;">● ● ●</div>
+      <p style="color:#6b7280;font-size:0.82rem;">After paying, click below:</p>
       <button onclick="confirmPaymentManual()" style="
-        margin-top:20px;background:var(--gradient);color:white;
-        border:none;padding:10px 24px;border-radius:100px;
-        font-weight:600;cursor:pointer;font-size:0.9rem;
-      ">I've Paid – Add Credits</button>
+        margin-top:12px;background:linear-gradient(135deg,#4F8EF7,#7C3AED);
+        color:white;border:none;padding:12px 28px;border-radius:100px;
+        font-weight:700;cursor:pointer;font-size:0.95rem;font-family:inherit;
+      ">✅ I've Paid – Add Credits</button>
       <br/>
       <button onclick="closePaymentModal()" style="
         margin-top:10px;background:none;border:none;
@@ -578,35 +522,32 @@ function showPaymentPendingUI() {
       ">Cancel</button>
     </div>
   `;
+}
 
-  // Inject blink animation if needed
-  if (!document.getElementById('blinkStyle')) {
-    const style = document.createElement('style');
-    style.id = 'blinkStyle';
-    style.textContent = `
-      @keyframes blink { 0%,100%{opacity:.2} 50%{opacity:1} }
-      .polling-dots span { font-size:1.2rem; color:#4F8EF7; margin:0 2px; display:inline-block; }
-    `;
-    document.head.appendChild(style);
-  }
+async function confirmPaymentManual() {
+  if (!state.user || !paymentSessionId) return;
+  await db.from('payment_sessions').update({
+    status: 'user_confirmed',
+    confirmed_at: new Date().toISOString()
+  }).eq('id', paymentSessionId);
+  showToast('Payment submitted! Waiting for verification...', 'info');
 }
 
 // ============================================================
-// POLLING — Check if admin confirmed payment in Supabase
+// PAYMENT POLLING — checks every 5s if admin confirmed
 // ============================================================
 function startPaymentPolling() {
-  stopPaymentPolling(); // clear any existing
-  let attempts = 0;
-  const maxAttempts = 60; // poll for max 5 minutes (every 5s)
+  stopPaymentPolling();
+  if (!paymentSessionId || !state.user) return;
 
+  let attempts = 0;
   state.paymentPolling = setInterval(async () => {
     attempts++;
-    if (attempts > maxAttempts) {
+    if (attempts > 72) { // max 6 minutes
       stopPaymentPolling();
       return;
     }
 
-    // Check Supabase for confirmed payment
     const { data } = await db
       .from('payment_sessions')
       .select('status, credits')
@@ -617,7 +558,7 @@ function startPaymentPolling() {
       stopPaymentPolling();
       await grantCredits(data.credits);
     }
-  }, 5000); // check every 5 seconds
+  }, 5000);
 }
 
 function stopPaymentPolling() {
@@ -627,44 +568,24 @@ function stopPaymentPolling() {
   }
 }
 
-// Manual confirm button (user clicks after paying)
-async function confirmPaymentManual() {
-  if (!state.user || !paymentSessionId) return;
-
-  // Mark as "user_confirmed" — admin still needs to verify
-  await db.from('payment_sessions').update({
-    status: 'user_confirmed',
-    confirmed_at: new Date().toISOString()
-  }).eq('id', paymentSessionId);
-
-  showToast('Payment submitted! Credits will be added after verification.', 'info');
-  closePaymentModal();
-  resetPaymentModal();
-}
-
-function resetPaymentModal() {
-  const modal = document.getElementById('paymentModal');
-  const methods = modal.querySelector('.payment-methods');
-  if (methods) methods.style.display = '';
-  modal.querySelector('.modal-desc').textContent = 'Choose your preferred payment method';
-}
-
-// Grant credits to user (called when payment confirmed)
 async function grantCredits(credits) {
-  if (!state.user || !state.profile) return;
-
-  state.profile.credits = (state.profile.credits || 0) + credits;
+  if (!state.user) return;
+  await loadProfile();
+  state.profile.credits = (state.profile?.credits || 0) + credits;
   await saveProfile();
 
   localStorage.removeItem('cc_payment_session');
-  closePaymentModal();
-  resetPaymentModal();
+  paymentSessionId = null;
+
+  // Close modal if open
+  document.getElementById('paymentModal').classList.add('hidden');
+
   updateUsageUI();
-  showToast(`🎉 ${credits} credits added to your account!`, 'success');
+  showToast(`🎉 ${credits} credits added!`, 'success');
 }
 
 // ============================================================
-// AD MODAL (kept for guest users)
+// AD MODAL (for guests)
 // ============================================================
 function showAdModal() {
   document.getElementById('adModal').classList.remove('hidden');
@@ -682,15 +603,11 @@ function startAd() {
 
   let seconds = 5;
   adCountdown.textContent = seconds;
-
   adInterval = setInterval(() => {
     seconds--;
     adCountdown.textContent = seconds;
     adFill.style.width = `${((5 - seconds) / 5) * 100}%`;
-    if (seconds <= 0) {
-      clearInterval(adInterval);
-      completeAd();
-    }
+    if (seconds <= 0) { clearInterval(adInterval); completeAd(); }
   }, 1000);
 }
 
@@ -703,42 +620,33 @@ function closeAdModal() {
 }
 
 function completeAd() {
-  // For guest: add 3 free uses via localStorage
-  const freeUsed = parseInt(localStorage.getItem('cc_free_used') || '0');
-  const adWatched = localStorage.getItem('cc_ad_watched') === 'true';
-  if (!adWatched) {
+  if (localStorage.getItem('cc_ad_watched') !== 'true') {
+    const freeUsed = parseInt(localStorage.getItem('cc_free_used') || '0');
     localStorage.setItem('cc_free_used', Math.max(0, freeUsed - 3));
     localStorage.setItem('cc_ad_watched', 'true');
   }
   closeAdModal();
   updateUsageUI();
-  showToast('🎉 You earned 3 more free removals!', 'success');
+  showToast('🎉 3 more free removals!', 'success');
 }
 
 // ============================================================
-// PRICING MODAL (show pricing section)
-// ============================================================
-function showPricingModal() {
-  document.getElementById('pricing').scrollIntoView({ behavior: 'smooth' });
-}
-
-// ============================================================
-// LEGAL / INFO MODALS (unchanged)
+// LEGAL MODALS
 // ============================================================
 const legalContent = {
   tos: `<h2 style="font-family:var(--font-display);font-size:1.5rem;font-weight:800;margin-bottom:16px;">Terms of Service</h2>
     <p style="color:var(--mid);font-size:0.85rem;margin-bottom:20px;">Last updated: December 2024</p>
     <h3 style="margin-bottom:8px;">1. Acceptance</h3><p>By using ClearCut AI, you agree to these terms.</p>
     <h3 style="margin:16px 0 8px;">2. Service</h3><p>AI background removal processed on-device. Images never uploaded to our servers.</p>
-    <h3 style="margin:16px 0 8px;">3. Payments</h3><p>One-time payments. Credits don't expire. 30-day refund guarantee.</p>
-    <h3 style="margin:16px 0 8px;">4. Liability</h3><p>Service provided "as is." We are not liable for any damages.</p>`,
+    <h3 style="margin:16px 0 8px;">3. Payments</h3><p>One-time payments. Credits do not expire. 30-day refund guarantee.</p>
+    <h3 style="margin:16px 0 8px;">4. Liability</h3><p>Service provided as-is. We are not liable for any damages.</p>`,
   privacy: `<h2 style="font-family:var(--font-display);font-size:1.5rem;font-weight:800;margin-bottom:16px;">Privacy Policy</h2>
     <p style="color:var(--mid);font-size:0.85rem;margin-bottom:20px;">Last updated: December 2024 · GDPR Compliant</p>
     <h3 style="margin-bottom:8px;">Your Images</h3><p>Never uploaded to our servers. All processing is local in your browser.</p>
-    <h3 style="margin:16px 0 8px;">Data We Store</h3><p>Email and credit balance (in Supabase, encrypted). No payment data stored by us — handled by payment providers.</p>
+    <h3 style="margin:16px 0 8px;">Data We Store</h3><p>Email and credit balance in Supabase (encrypted). No payment data stored by us.</p>
     <h3 style="margin:16px 0 8px;">GDPR</h3><p>You can request deletion at privacy@clearcut.ai.</p>`,
   refund: `<h2 style="font-family:var(--font-display);font-size:1.5rem;font-weight:800;margin-bottom:16px;">Refund Policy</h2>
-    <h3 style="margin-bottom:8px;">30-Day Money Back</h3><p>Not satisfied? Email support@clearcut.ai within 30 days for a full refund, no questions asked.</p>`,
+    <h3 style="margin-bottom:8px;">30-Day Money Back</h3><p>Not satisfied? Email support@clearcut.ai within 30 days for a full refund.</p>`,
   dmca: `<h2 style="font-family:var(--font-display);font-size:1.5rem;font-weight:800;margin-bottom:16px;">DMCA Notice</h2>
     <p>Send DMCA notices to: dmca@clearcut.ai</p>`,
 };
@@ -763,8 +671,7 @@ function closeInfoModal() {
 // FAQ
 // ============================================================
 function toggleFaq(index) {
-  const items = document.querySelectorAll('.faq-item');
-  const item = items[index];
+  const item = document.querySelectorAll('.faq-item')[index];
   if (item) item.classList.toggle('open');
 }
 
@@ -809,8 +716,7 @@ function declineCookies() {
 function setupKeyboardShortcuts() {
   document.addEventListener('keydown', async (e) => {
     if ((e.ctrlKey || e.metaKey) && e.key === 'v') {
-      const processingArea = document.getElementById('processingArea');
-      if (!processingArea.classList.contains('hidden')) return;
+      if (!document.getElementById('processingArea').classList.contains('hidden')) return;
       await pasteFromClipboard();
     }
     if (e.key === 'Escape') {
