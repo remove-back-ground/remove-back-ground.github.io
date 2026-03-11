@@ -129,10 +129,7 @@ function updateAuthUI() {
     if (authBtn) authBtn.innerHTML = `<div class="user-avatar" onclick="toggleUserMenu()">${initial}</div>`;
     if (authBtnMobile) authBtnMobile.innerHTML = `<button class="btn-nav-cta" onclick="doSignOut()">🚪 Sign Out</button>`;
   } else {
-    if (authBtn) authBtn.innerHTML = `
-      <button class="btn-nav-cta" onclick="window.location.href='auth.html'">Sign In</button>
-      <button class="btn-nav-secondary" onclick="window.location.href='auth.html#signup'">Sign Up</button>
-    `;
+    if (authBtn) authBtn.innerHTML = `<button class="btn-nav-cta" onclick="window.location.href='auth.html'">Sign In</button>`;
     if (authBtnMobile) authBtnMobile.innerHTML = `
       <button class="btn-nav-cta" onclick="window.location.href='auth.html'">Sign In</button>
       <button class="btn-nav-secondary" onclick="window.location.href='auth.html#signup'">Sign Up</button>
