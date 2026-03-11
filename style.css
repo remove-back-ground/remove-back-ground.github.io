@@ -1151,3 +1151,67 @@ box-shadow:0 6px 16px rgba(0,0,0,0.08);
 .payment-icon{
 font-size:22px;
 }
+
+/* User Avatar */
+.user-avatar {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #4F8EF7, #7C3AED);
+  color: white; font-weight: 700; font-size: 0.9rem;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: transform 0.2s;
+  border: 2px solid rgba(255,255,255,0.2);
+}
+.user-avatar:hover { transform: scale(1.08); }
+
+.user-dropdown {
+  position: fixed;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 16px;
+  min-width: 220px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.12);
+  z-index: 9999;
+}
+.user-dropdown-header {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 12px;
+}
+.user-dropdown-avatar {
+  width: 40px; height: 40px; border-radius: 50%;
+  background: linear-gradient(135deg, #4F8EF7, #7C3AED);
+  color: white; font-weight: 800; font-size: 1rem;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.user-dropdown-info { overflow: hidden; }
+.user-dropdown-name {
+  font-weight: 700; font-size: 0.92rem;
+  color: #0f0f17; white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis;
+}
+.user-dropdown-email {
+  font-size: 0.78rem; color: #6b7280;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.user-dropdown-credits {
+  background: linear-gradient(135deg, #f0f4ff, #f5f0ff);
+  border: 1px solid #e0e7ff;
+  border-radius: 10px; padding: 10px 12px;
+  margin-bottom: 10px;
+  display: flex; align-items: center; gap: 8px;
+  font-size: 0.88rem; font-weight: 600; color: #4F8EF7;
+}
+.user-dropdown hr {
+  border: none; border-top: 1px solid #e5e7eb; margin: 8px 0;
+}
+.user-dropdown-logout {
+  width: 100%; padding: 9px;
+  border: none; background: none;
+  color: #ef4444; font-weight: 600;
+  cursor: pointer; border-radius: 8px;
+  font-family: inherit; font-size: 0.88rem;
+  text-align: left; display: flex; align-items: center; gap: 8px;
+}
+.user-dropdown-logout:hover { background: #fef2f2; }
