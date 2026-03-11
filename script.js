@@ -131,8 +131,18 @@ function updateAuthUI() {
   } else {
     authBtn.innerHTML = `<button class="btn-nav-cta" onclick="window.location.href='auth.html'">Sign In</button>`;
   }
+const heroAuthBtns = document.getElementById('heroAuthBtns');
+if (heroAuthBtns) {
+  if (state.user) {
+    heroAuthBtns.innerHTML = '';
+  } else {
+    heroAuthBtns.innerHTML = `
+      <button class="btn-nav-cta" onclick="window.location.href='auth.html'">Sign In</button>
+      <button class="btn-nav-cta" style="background:transparent;border:2px solid white;color:white;" onclick="window.location.href='auth.html'">Sign Up</button>
+    `;
+  }
 }
-
+}
 function toggleUserMenu() {
   const existing = document.getElementById('userDropdown');
   if (existing) { existing.remove(); return; }
