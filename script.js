@@ -10,7 +10,7 @@ const SUPABASE_URL = 'https://rhnahtyjrnpnrtjrnocp.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_H19x6_h9zIKPkbCSxGC6JQ_eGcM4e8m';
 
 // Initialize Supabase (CDN loaded in HTML)
-const { createClient } = window.supabase;
+const { createClient } = supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // ============================================================
@@ -510,20 +510,6 @@ function payBinance() {
     : "https://s.binance.com/uA7xJblU";
 
   // Generate a session ID to track this payment attempt
-  async function savePaymentSession(sessionId, plan) {
-  if (!state.user) return;
-  console.log('Saving session:', sessionId, state.user.id); // زيد هاد السطر
-  const { data, error } = await db.from('payment_sessions').insert({
-    id: sessionId,
-    user_id: state.user.id,
-    plan: plan,
-    credits: plan === 'pro' ? 500 : 100,
-    status: 'pending',
-    created_at: new Date().toISOString()
-  });
-  console.log('Result:', data, error); // زيد هاد السطر
-}
-  
   paymentSessionId = generateSessionId();
   savePaymentSession(paymentSessionId, selectedPlan);
 
@@ -551,8 +537,9 @@ function generateSessionId() {
 
 // Save pending payment to Supabase
 async function savePaymentSession(sessionId, plan) {
-  if (!state.user) return;
-  await db.from('payment_sessions').insert({
+  console.log('savePaymentSession called:', sessionId, plan, state.user?.id);
+  if (!state.user) { console.log('No user!'); return; }
+  const { data, error } = await db.from('payment_sessions').insert({
     id: sessionId,
     user_id: state.user.id,
     plan: plan,
@@ -560,6 +547,7 @@ async function savePaymentSession(sessionId, plan) {
     status: 'pending',
     created_at: new Date().toISOString()
   });
+  console.log('Insert result:', data, 'Error:', error);
 }
 
 // Show UI that payment is pending
