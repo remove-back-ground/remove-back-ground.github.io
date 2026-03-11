@@ -1085,6 +1085,15 @@ body {
   to { opacity: 1; }
 }
 
+.mobile-menu .btn-nav-secondary {
+  width: 100%;
+  margin: 8px 0 0 0;
+  text-align: center;
+  display: block;
+  padding: 12px;
+  border-radius: 12px;
+}
+
 /* ---- RESPONSIVE ---- */
 @media (max-width: 768px) {
   .nav-links { display: none; }
