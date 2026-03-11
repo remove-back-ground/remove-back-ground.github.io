@@ -71,7 +71,6 @@ if (state.user) {
     startPaymentPolling();
   }
 }
-  }
 
   db.auth.onAuthStateChange(async (event, session) => {
     if (event === 'SIGNED_IN' && session?.user) {
