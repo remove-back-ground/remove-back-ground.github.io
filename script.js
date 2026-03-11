@@ -128,7 +128,10 @@ function updateAuthUI() {
     const initial = (state.user.email || 'U').charAt(0).toUpperCase();
     authBtn.innerHTML = `<div class="user-avatar" onclick="toggleUserMenu()">${initial}</div>`;
   } else {
-    authBtn.innerHTML = `<button class="btn-nav-cta" onclick="window.location.href='auth.html'">Sign In</button>`;
+    authBtn.innerHTML = `
+      <button class="btn-nav-cta" onclick="window.location.href='auth.html'">Sign In</button>
+      <button class="btn-nav-secondary" onclick="window.location.href='auth.html#signup'">Sign Up</button>
+    `;
   }
 }
 
@@ -136,14 +139,28 @@ function toggleUserMenu() {
   const existing = document.getElementById('userDropdown');
   if (existing) { existing.remove(); return; }
 
+  const email = state.user?.email || '';
+  const initial = email.charAt(0).toUpperCase();
+  const credits = getCreditsDisplay();
+
   const menu = document.createElement('div');
   menu.id = 'userDropdown';
   menu.className = 'user-dropdown';
   menu.innerHTML = `
-    <div class="user-dropdown-email">${state.user?.email || ''}</div>
-    <div class="user-dropdown-credits">💳 ${getCreditsDisplay()} credits</div>
-    <hr style="border:none;border-top:1px solid #e5e7eb;margin:8px 0">
-    <button onclick="doSignOut()">Sign Out</button>
+    <div class="user-dropdown-header">
+      <div class="user-dropdown-avatar">${initial}</div>
+      <div class="user-dropdown-info">
+        <div class="user-dropdown-name">${email.split('@')[0]}</div>
+        <div class="user-dropdown-email">${email}</div>
+      </div>
+    </div>
+    <div class="user-dropdown-credits">
+      💳 <span>${credits} credits remaining</span>
+    </div>
+    <hr/>
+    <button class="user-dropdown-logout" onclick="doSignOut()">
+      🚪 Sign Out
+    </button>
   `;
   document.body.appendChild(menu);
 
@@ -158,7 +175,10 @@ function toggleUserMenu() {
 
   setTimeout(() => {
     document.addEventListener('click', function handler(e) {
-      if (!menu.contains(e.target)) { menu.remove(); document.removeEventListener('click', handler); }
+      if (!menu.contains(e.target) && !e.target.closest('.user-avatar')) {
+        menu.remove();
+        document.removeEventListener('click', handler);
+      }
     });
   }, 100);
 }
