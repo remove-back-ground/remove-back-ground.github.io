@@ -1084,32 +1084,29 @@ body {
   from { opacity: 0; }
   to { opacity: 1; }
 }
+
 .btn-nav-secondary {
-  padding: 8px 18px;
+  display: none;
+}
+.mobile-menu .btn-nav-secondary {
+  display: block;
+  width: 100%;
+  margin: 8px 0 0 0;
+  padding: 12px;
   border: 2px solid #4F8EF7;
-  border-radius: 100px;
+  border-radius: 12px;
   background: transparent;
   color: #4F8EF7;
   font-family: var(--font);
-  font-size: 0.88rem;
+  font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
-  margin-left: 8px;
+  text-align: center;
 }
-.btn-nav-secondary:hover {
+.mobile-menu .btn-nav-secondary:hover {
   background: #4F8EF7;
   color: white;
 }
-.mobile-menu .btn-nav-secondary {
-  width: 100%;
-  margin: 8px 0 0 0;
-  text-align: center;
-  display: block;
-  padding: 12px;
-  border-radius: 12px;
-}
-
 /* ---- RESPONSIVE ---- */
 @media (max-width: 768px) {
   .nav-links { display: none; }
