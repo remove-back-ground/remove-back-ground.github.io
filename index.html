@@ -509,44 +509,43 @@
   
 <!-- Payment Modal -->
 <div class="modal-overlay hidden" id="paymentModal">
+  <div class="modal-card payment-card">
+    <h2 class="modal-title">Complete Your Purchase</h2>
+    <p class="modal-desc">Choose your preferred payment method</p>
 
-<div class="modal-card payment-card">
+    <div class="payment-methods">
 
-<h2 class="modal-title">Complete Your Purchase</h2>
-<p class="modal-desc">Choose your preferred payment method</p>
+      <button class="payment-method" onclick="payBinance()">
+        <img src="https://cryptologos.cc/logos/binance-coin-bnb-logo.png" width="28" height="28" style="border-radius:6px"/>
+        <div>
+          <strong>Binance Pay</strong>
+          <span>Fast crypto payment</span>
+        </div>
+      </button>
 
-<div class="payment-methods">
+      <button class="payment-method" onclick="payNexa()">
+        <div class="payment-icon">💎</div>
+        <div>
+          <strong>NexaPay</strong>
+          <span>Secure blockchain payment</span>
+        </div>
+      </button>
 
-<button class="payment-method" onclick="payBinance()">
-<div class="payment-icon">🟡</div>
-<div>
-<strong>Binance Pay</strong>
-<span>Fast crypto payment</span>
-</div>
-</button>
+      <button class="payment-method" onclick="payLemon()">
+        <div class="payment-icon">💳</div>
+        <div>
+          <strong>Pay with Card</strong>
+          <span>Visa, Mastercard, PayPal</span>
+        </div>
+      </button>
 
-<button class="payment-method" onclick="payNexa()">
-<div class="payment-icon">💎</div>
-<div>
-<strong>NexaPay</strong>
-<span>Secure blockchain payment</span>
-</div>
-</button>
-</div>
+    </div>
 
-  <button class="payment-method" onclick="payLemon()">
-  <div class="payment-icon">💳</div>
-  <div>
-    <strong>Pay with Card</strong>
-    <span>Visa, Mastercard, PayPal</span>
+    <button class="btn-secondary" style="margin-top:24px;" onclick="closePaymentModal()">
+      Cancel
+    </button>
+
   </div>
-</button>
-  
-<button class="btn-secondary" onclick="closePaymentModal()">
-Cancel
-</button>
-
-</div>
 </div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="script.js"></script>
