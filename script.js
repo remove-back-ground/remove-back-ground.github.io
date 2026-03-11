@@ -510,6 +510,20 @@ function payBinance() {
     : "https://s.binance.com/uA7xJblU";
 
   // Generate a session ID to track this payment attempt
+  async function savePaymentSession(sessionId, plan) {
+  if (!state.user) return;
+  console.log('Saving session:', sessionId, state.user.id); // زيد هاد السطر
+  const { data, error } = await db.from('payment_sessions').insert({
+    id: sessionId,
+    user_id: state.user.id,
+    plan: plan,
+    credits: plan === 'pro' ? 500 : 100,
+    status: 'pending',
+    created_at: new Date().toISOString()
+  });
+  console.log('Result:', data, error); // زيد هاد السطر
+}
+  
   paymentSessionId = generateSessionId();
   savePaymentSession(paymentSessionId, selectedPlan);
 
