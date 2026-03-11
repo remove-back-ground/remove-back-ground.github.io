@@ -1215,3 +1215,21 @@ font-size:22px;
   text-align: left; display: flex; align-items: center; gap: 8px;
 }
 .user-dropdown-logout:hover { background: #fef2f2; }
+
+.btn-nav-secondary {
+  padding: 8px 18px;
+  border: 2px solid #4F8EF7;
+  border-radius: 100px;
+  background: transparent;
+  color: #4F8EF7;
+  font-family: var(--font);
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-left: 8px;
+}
+.btn-nav-secondary:hover {
+  background: #4F8EF7;
+  color: white;
+}
