@@ -123,21 +123,13 @@ async function saveProfile() {
 // ============================================================
 function updateAuthUI() {
   const authBtn = document.getElementById('authNavBtn');
-  const authBtnMobile = document.getElementById('authNavBtnMobile');
+  if (!authBtn) return;
 
   if (state.user) {
     const initial = (state.user.email || 'U').charAt(0).toUpperCase();
-    if (authBtn) authBtn.innerHTML = `<div class="user-avatar" onclick="toggleUserMenu()">${initial}</div>`;
-    if (authBtnMobile) authBtnMobile.innerHTML = `<button class="btn-nav-cta" onclick="doSignOut()">🚪 Sign Out</button>`;
+    authBtn.innerHTML = `<div class="user-avatar" onclick="toggleUserMenu()">${initial}</div>`;
   } else {
-    if (authBtn) authBtn.innerHTML = `
-      <button class="btn-nav-cta" onclick="window.location.href='auth.html'">Sign In</button>
-      <button class="btn-nav-secondary" onclick="window.location.href='auth.html#signup'">Sign Up</button>
-    `;
-    if (authBtnMobile) authBtnMobile.innerHTML = `
-      <button class="btn-nav-cta" onclick="window.location.href='auth.html'">Sign In</button>
-      <button class="btn-nav-secondary" onclick="window.location.href='auth.html#signup'">Sign Up</button>
-    `;
+    authBtn.innerHTML = `<button class="btn-nav-cta" onclick="window.location.href='auth.html'">Sign In</button>`;
   }
 }
 
