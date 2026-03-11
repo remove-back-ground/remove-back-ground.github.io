@@ -509,6 +509,18 @@ function payNexa() {
   startPayment(url);
 }
 
+function payLemon() {
+  const url = selectedPlan === 'pro'
+    ? "https://snipix-ai.lemonsqueezy.com/checkout/buy/5890d74c-8965-4456-a0f2-355bb5b34d6b"
+    : "https://snipix-ai.lemonsqueezy.com/checkout/buy/517140d4-72c1-497b-97f4-48d2dd856634";
+  
+  const email = state.user?.email || '';
+  window.open(url + '?checkout[email]=' + encodeURIComponent(email), '_blank');
+  
+  showToast('Complete payment in the opened tab', 'info');
+  closePaymentModal();
+}
+
 async function startPayment(url) {
   // Generate session ID
   paymentSessionId = 'ps_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
