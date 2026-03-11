@@ -487,7 +487,7 @@ function showSignupWallModal() {
 // ============================================================
 let selectedPlan = null;
 // Store a unique payment session ID per attempt
-let paymentSessionId = null;
+let paymentSessionId = localStorage.getItem('cc_payment_session') || null;
 
 function openPaymentModal(plan) {
   if (!state.user) {
@@ -511,6 +511,7 @@ function payBinance() {
 
   // Generate a session ID to track this payment attempt
   paymentSessionId = generateSessionId();
+  localStorage.setItem('cc_payment_session', paymentSessionId);
   savePaymentSession(paymentSessionId, selectedPlan);
 
   window.open(url, "_blank");
@@ -524,6 +525,7 @@ function payNexa() {
     : "https://nexapay.one/checkout/order_97e23449f4632a11d858866e4618709c?sig=plsig_2135dcefcd4a1beb7b0fd9cf94f92023194de07ea0079dd9fa07c32856b837b4";
 
   paymentSessionId = generateSessionId();
+  localStorage.setItem('cc_payment_session', paymentSessionId);
   savePaymentSession(paymentSessionId, selectedPlan);
 
   window.open(url, "_blank");
@@ -658,6 +660,7 @@ async function grantCredits(credits) {
   resetPaymentModal();
   updateUsageUI();
   showToast(`🎉 ${credits} credits added to your account!`, 'success');
+  localStorage.removeItem('cc_payment_session');
 }
 
 // ============================================================
