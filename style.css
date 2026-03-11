@@ -1085,28 +1085,7 @@ body {
   to { opacity: 1; }
 }
 
-.btn-nav-secondary {
-  display: none;
-}
-.mobile-menu .btn-nav-secondary {
-  display: block;
-  width: 100%;
-  margin: 8px 0 0 0;
-  padding: 12px;
-  border: 2px solid #4F8EF7;
-  border-radius: 12px;
-  background: transparent;
-  color: #4F8EF7;
-  font-family: var(--font);
-  font-size: 0.95rem;
-  font-weight: 600;
-  cursor: pointer;
-  text-align: center;
-}
-.mobile-menu .btn-nav-secondary:hover {
-  background: #4F8EF7;
-  color: white;
-}
+
 /* ---- RESPONSIVE ---- */
 @media (max-width: 768px) {
   .nav-links { display: none; }
