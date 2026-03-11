@@ -582,16 +582,20 @@ function stopPaymentPolling() {
 
 async function grantCredits(credits) {
   if (!state.user) return;
-  await loadProfile();
-  state.profile.credits = (state.profile?.credits || 0) + credits;
+  
+  await loadProfile(); // reload profile first
+  
+  if (!state.profile) {
+    await createProfile(state.user);
+  }
+  
+  state.profile.credits = (state.profile.credits || 0) + credits;
   await saveProfile();
 
   localStorage.removeItem('cc_payment_session');
   paymentSessionId = null;
 
-  // Close modal if open
   document.getElementById('paymentModal').classList.add('hidden');
-
   updateUsageUI();
   showToast(`🎉 ${credits} credits added!`, 'success');
 }
