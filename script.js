@@ -656,11 +656,11 @@ async function grantCredits(credits) {
   state.profile.credits = (state.profile.credits || 0) + credits;
   await saveProfile();
 
+  localStorage.removeItem('cc_payment_session');
   closePaymentModal();
   resetPaymentModal();
   updateUsageUI();
   showToast(`🎉 ${credits} credits added to your account!`, 'success');
-  localStorage.removeItem('cc_payment_session');
 }
 
 // ============================================================
