@@ -55,9 +55,22 @@ async function init() {
   setupKeyboardShortcuts();
   checkCookieBanner();
 
-  // If there's a pending payment session, start polling
-  if (paymentSessionId && state.user) {
+  // Check for any unconfirmed payment sessions
+if (state.user) {
+  const { data } = await db
+    .from('payment_sessions')
+    .select('id, credits')
+    .eq('user_id', state.user.id)
+    .eq('status', 'confirmed')
+    .is('confirmed_at', null)
+    .single();
+  
+  if (data) {
+    await grantCredits(data.credits);
+  } else if (paymentSessionId) {
     startPaymentPolling();
+  }
+}
   }
 
   db.auth.onAuthStateChange(async (event, session) => {
