@@ -1,4 +1,3 @@
 User-agent: *
 Allow: /
-
-Sitemap: https://RemoveBg.ai/sitemap.xml
+Sitemap: https://remove-back-ground.github.io/sitemap.xml
