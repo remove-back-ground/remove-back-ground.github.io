@@ -487,6 +487,7 @@ function payBinance() {
     ? "https://s.binance.com/yVwuf5uT"
     : "https://s.binance.com/uA7xJblU";
   window.open(url, '_blank');
+  document.getElementById('ivedPaidSection').style.display = 'block';
 }
 
 function payNexa() {
@@ -494,6 +495,27 @@ function payNexa() {
     ? "https://nexapay.one/checkout/order_264b5b1168862f013b3a98ac4b9ee7bd"
     : "https://nexapay.one/checkout/order_97e23449f4632a11d858866e4618709c";
   window.open(url, '_blank');
+  document.getElementById('ivedPaidSection').style.display = 'block';
+}
+
+async function showIvePaid() {
+  if (!state.user) return;
+  paymentSessionId = 'ps_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+  localStorage.setItem('cc_payment_session', paymentSessionId);
+  
+  await db.from('payment_sessions').insert({
+    id: paymentSessionId,
+    user_id: state.user.id,
+    plan: selectedPlan,
+    credits: selectedPlan === 'pro' ? 500 : 100,
+    status: 'user_confirmed',
+    confirmed_at: new Date().toISOString(),
+    created_at: new Date().toISOString()
+  });
+
+  closePaymentModal();
+  showToast('Payment submitted! Waiting for verification...', 'info');
+  startPaymentPolling();
 }
 
 function payLemon() {
