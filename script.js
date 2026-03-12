@@ -105,25 +105,27 @@ async function saveProfile() {
 // ============================================================
 function updateAuthUI() {
   const authBtn = document.getElementById('authNavBtn');
-  if (!authBtn) return;
+  const authBtnMobile = document.getElementById('authNavBtnMobile');
 
   if (state.user) {
     const initial = (state.user.email || 'U').charAt(0).toUpperCase();
-    authBtn.innerHTML = `<div class="user-avatar" onclick="toggleUserMenu()">${initial}</div>`;
+    if (authBtn) authBtn.innerHTML = `<div class="user-avatar" onclick="toggleUserMenu()">${initial}</div>`;
+    if (authBtnMobile) authBtnMobile.innerHTML = `<button class="btn-nav-cta" style="width:100%;margin-top:8px" onclick="doSignOut()">🚪 Sign Out</button>`;
   } else {
-    authBtn.innerHTML = `<button class="btn-nav-cta" onclick="window.location.href='auth.html'">Sign In</button>`;
+    if (authBtn) authBtn.innerHTML = `<button class="btn-nav-cta" onclick="window.location.href='auth.html'">Sign In</button>`;
+    if (authBtnMobile) authBtnMobile.innerHTML = `
+      <button class="btn-nav-cta" style="width:100%;margin-top:8px" onclick="window.location.href='auth.html'">Sign In</button>
+      <button class="btn-nav-cta" style="width:100%;margin-top:8px;background:transparent;border:2px solid #4F8EF7;color:#4F8EF7;" onclick="window.location.href='auth.html'">Sign Up</button>
+    `;
   }
-const heroAuthBtns = document.getElementById('heroAuthBtns');
-if (heroAuthBtns) {
-  if (state.user) {
-    heroAuthBtns.innerHTML = '';
-  } else {
-    heroAuthBtns.innerHTML = `
+
+  const heroAuthBtns = document.getElementById('heroAuthBtns');
+  if (heroAuthBtns) {
+    heroAuthBtns.innerHTML = state.user ? '' : `
       <button class="btn-nav-cta" onclick="window.location.href='auth.html'">Sign In</button>
       <button class="btn-nav-cta" style="background:transparent;border:2px solid white;color:white;" onclick="window.location.href='auth.html'">Sign Up</button>
     `;
   }
-}
 }
 function toggleUserMenu() {
   const existing = document.getElementById('userDropdown');
