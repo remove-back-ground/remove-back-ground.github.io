@@ -488,6 +488,7 @@ function payBinance() {
     : "https://s.binance.com/uA7xJblU";
   window.open(url, '_blank');
   document.getElementById('ivedPaidSection').style.display = 'block';
+  document.getElementById('ivePaidBtn').onclick = showIvePaid;
 }
 
 function payNexa() {
@@ -496,6 +497,7 @@ function payNexa() {
     : "https://nexapay.one/checkout/order_97e23449f4632a11d858866e4618709c";
   window.open(url, '_blank');
   document.getElementById('ivedPaidSection').style.display = 'block';
+  document.getElementById('ivePaidBtn').onclick = showIvePaid;
 }
 
 async function showIvePaid() {
