@@ -513,16 +513,14 @@
     <h2 class="modal-title">Complete Your Purchase</h2>
     <p class="modal-desc">Choose your preferred payment method</p>
 
-    <div class="payment-methods">
-
+    <div class="payment-methods" id="paymentMethods">
       <button class="payment-method" onclick="payBinance()">
-       <img src="binance.png" width="32" height="32" style="border-radius:6px;object-fit:contain"/>
+        <img src="binance.png" width="32" height="32" style="border-radius:6px;object-fit:contain"/>
         <div>
           <strong>Binance Pay</strong>
           <span>Fast crypto payment</span>
         </div>
       </button>
-
       <button class="payment-method" onclick="payNexa()">
         <img src="nexapay.png" width="32" height="32" style="border-radius:6px;object-fit:contain"/>
         <div>
@@ -530,7 +528,6 @@
           <span>Secure blockchain payment</span>
         </div>
       </button>
-
       <button class="payment-method" onclick="payLemon()">
         <div class="payment-icon">💳</div>
         <div>
@@ -538,13 +535,16 @@
           <span>Visa, Mastercard, PayPal</span>
         </div>
       </button>
+    </div>
 
+    <div id="ivedPaidSection" style="display:none;text-align:center;margin-top:16px;">
+      <p style="color:#6b7280;font-size:0.85rem;margin-bottom:12px;">After paying with Binance or NexaPay, click below:</p>
+      <button onclick="showIvePaid()" style="background:linear-gradient(135deg,#4F8EF7,#7C3AED);color:white;border:none;padding:12px 28px;border-radius:100px;font-weight:700;cursor:pointer;font-size:0.95rem;font-family:inherit;">✅ I've Paid – Add Credits</button>
     </div>
 
     <button class="btn-secondary" style="margin-top:24px;" onclick="closePaymentModal()">
       Cancel
     </button>
-
   </div>
 </div>
   <script src="https://quge5.com/88/tag.min.js" data-zone="218865" async data-cfasync="false"></script>
