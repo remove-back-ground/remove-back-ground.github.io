@@ -56,23 +56,6 @@ async function init() {
   setupKeyboardShortcuts();
   checkCookieBanner();
 
-  // Check for any unconfirmed payment sessions
-if (state.user) {
-  const { data } = await db
-    .from('payment_sessions')
-    .select('id, credits')
-    .eq('user_id', state.user.id)
-    .eq('status', 'confirmed')
-    .is('confirmed_at', null)
-    .single();
-  
-  if (data) {
-    await grantCredits(data.credits);
-  } else if (paymentSessionId) {
-    startPaymentPolling();
-  }
-}
-
   db.auth.onAuthStateChange(async (event, session) => {
     if (event === 'SIGNED_IN' && session?.user) {
       state.user = session.user;
@@ -80,7 +63,6 @@ if (state.user) {
       if (!state.profile) await createProfile(session.user);
       updateAuthUI();
       updateUsageUI();
-      if (paymentSessionId) startPaymentPolling();
     } else if (event === 'SIGNED_OUT') {
       state.user = null;
       state.profile = null;
