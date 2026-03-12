@@ -486,18 +486,14 @@ function payBinance() {
   const url = selectedPlan === 'pro'
     ? "https://s.binance.com/yVwuf5uT"
     : "https://s.binance.com/uA7xJblU";
-  window.open(url, '_blank');
-  document.getElementById('ivedPaidSection').style.display = 'block';
-  document.getElementById('ivePaidBtn').onclick = showIvePaid;
+  startPayment(url);
 }
 
 function payNexa() {
   const url = selectedPlan === 'pro'
     ? "https://nexapay.one/checkout/order_264b5b1168862f013b3a98ac4b9ee7bd"
     : "https://nexapay.one/checkout/order_97e23449f4632a11d858866e4618709c";
-  window.open(url, '_blank');
-  document.getElementById('ivedPaidSection').style.display = 'block';
-  document.getElementById('ivePaidBtn').onclick = showIvePaid;
+  startPayment(url);
 }
 
 async function showIvePaid() {
@@ -533,11 +529,9 @@ function payLemon() {
 }
 
 async function startPayment(url) {
-  // Generate session ID
   paymentSessionId = 'ps_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
   localStorage.setItem('cc_payment_session', paymentSessionId);
 
-  // Save to Supabase
   await db.from('payment_sessions').insert({
     id: paymentSessionId,
     user_id: state.user.id,
@@ -547,14 +541,8 @@ async function startPayment(url) {
     created_at: new Date().toISOString()
   });
 
-  // Open payment page
   window.open(url, '_blank');
-
-  // Show pending UI
-  showPaymentPendingUI();
-
-  // Start polling
-  startPaymentPolling();
+  document.getElementById('ivedPaidSection').style.display = 'block';
 }
 
 function showPaymentPendingUI() {
